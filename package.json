@@ -23,7 +23,10 @@
     "lint:backend": "cd backend && npm run lint"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@typescript-eslint/parser": "^8.52.0",
+    "@typescript-eslint/scope-manager": "^8.52.0",
+    "concurrently": "^8.2.2",
+    "eslint-plugin-jsx-a11y": "^6.10.2"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -32,4 +35,3 @@
   "author": "",
   "license": "ISC"
 }
-
