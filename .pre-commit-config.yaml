@@ -1,0 +1,49 @@
+# Pre-commit hooks configuration for BrainEvo EdTech SaaS Platform
+# This file configures automatic linting before commits
+
+repos:
+  # ESLint for JavaScript/TypeScript files
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.55.0
+    hooks:
+      - id: eslint
+        name: ESLint (Frontend)
+        types: [file]
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
+        args:
+          - --config=frontend/.eslintrc.json
+          - --fix
+        additional_dependencies:
+          - eslint@^8.55.0
+          - '@typescript-eslint/parser@^8.52.0'
+          - '@typescript-eslint/eslint-plugin@^8.52.0'
+          - 'eslint-config-next@^14.0.0'
+          - 'eslint-plugin-react@^7.37.5'
+          - 'eslint-plugin-react-hooks@^4.6.0'
+          - 'eslint-plugin-jsx-a11y@^6.10.2'
+
+      - id: eslint
+        name: ESLint (Backend)
+        types: [file]
+        files: ^backend/.*\.js$
+        args:
+          - --config=backend/.eslintrc.json
+          - --fix
+        additional_dependencies:
+          - eslint@^8.55.0
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+      - id: end-of-file-fixer
+        name: Fix End of Files
+      - id: check-yaml
+        name: Check YAML
+      - id: check-json
+        name: Check JSON
+      - id: check-added-large-files
+        name: Check for large files
+        args: ['--maxkb=1000']
