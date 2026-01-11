@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+    API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001',
   },
   images: {
     domains: ['localhost'],
@@ -15,7 +15,7 @@ const nextConfig = {
       return [
         {
           source: '/api/:path*',
-          destination: 'http://localhost:5000/api/:path*',
+          destination: 'http://localhost:5001/api/:path*',
         },
       ];
     }
