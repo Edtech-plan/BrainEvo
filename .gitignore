@@ -53,3 +53,5 @@ backend/temp/
 frontend/.next/
 frontend/out/
 
+# Pre-commit
+.pre-commit-cache/

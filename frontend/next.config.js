@@ -2,12 +2,19 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    // Add any build-time environment variables here
+    API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
   },
   images: {
     domains: ['localhost'],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:5000/api/:path*',
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig
-
