@@ -45,7 +45,7 @@ app.use(errorHandler);
 // Start server only if not running on Vercel
 // Vercel handles the server automatically
 if (process.env.VERCEL !== '1') {
-  const PORT = env.PORT || 5000;
+  const PORT = env.PORT || 5001;
   app.listen(PORT, () => {
     console.log(`Server running in ${env.NODE_ENV} mode on port ${PORT}`);
   });

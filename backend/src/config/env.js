@@ -8,7 +8,7 @@ require('dotenv').config();
 const env = {
   // Server Configuration
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: process.env.PORT || 5000,
+  PORT: process.env.PORT || 5001,
 
   // Database Configuration
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/brainevo',
