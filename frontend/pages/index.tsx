@@ -27,7 +27,7 @@ const Home: NextPage = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header - Black Navigation Bar */}
-      <header className="bg-black text-white px-5 py-5 flex justify-between items-center">
+      <header className="bg-[#202020] text-white px-5 py-5 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/logoo.png"
@@ -178,7 +178,7 @@ const Home: NextPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-5 bg-black text-white">
+      <footer className="text-center py-5 bg-[#202020] text-white">
         <p className="m-0">&copy; 2024 BrainEvo. All rights reserved.</p>
       </footer>
     </div>
