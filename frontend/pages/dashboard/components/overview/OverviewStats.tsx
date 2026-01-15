@@ -1,4 +1,5 @@
 import { Clock, TrendingUp, BookOpen, Award } from 'lucide-react';
+import { StatCard } from '../../../../src/shared/components/ui';
 
 function OverviewStats() {
   const stats = [
@@ -31,18 +32,13 @@ function OverviewStats() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
-        <div
+        <StatCard
           key={index}
-          className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow"
-        >
-          <div
-            className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center mb-4`}
-          >
-            {stat.icon}
-          </div>
-          <p className="text-gray-600 text-sm mb-1">{stat.label}</p>
-          <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-        </div>
+          label={stat.label}
+          value={stat.value}
+          icon={stat.icon}
+          color={stat.color}
+        />
       ))}
     </div>
   );

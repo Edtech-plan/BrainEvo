@@ -19,7 +19,7 @@ router.use(auth);
 
 router.post(
   '/',
-  authorize('teacher', 'admin'),
+  authorize('teacher', 'organization_admin'),
   [
     body('title').trim().notEmpty().withMessage('Title is required'),
     body('description').trim().notEmpty().withMessage('Description is required'),
@@ -29,7 +29,7 @@ router.post(
   createAssignment
 );
 
-router.put('/:id', authorize('teacher', 'admin'), updateAssignment);
-router.delete('/:id', authorize('teacher', 'admin'), deleteAssignment);
+router.put('/:id', authorize('teacher', 'organization_admin'), updateAssignment);
+router.delete('/:id', authorize('teacher', 'organization_admin'), deleteAssignment);
 
 module.exports = router;

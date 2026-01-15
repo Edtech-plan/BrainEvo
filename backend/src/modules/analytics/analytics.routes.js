@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.use(auth);
 
-router.get('/dashboard', authorize('admin', 'teacher'), getDashboard);
-router.get('/course/:courseId', authorize('admin', 'teacher'), getCourseAnalytics);
+router.get('/dashboard', authorize('organization_admin', 'teacher'), getDashboard);
+router.get('/course/:courseId', authorize('organization_admin', 'teacher'), getCourseAnalytics);
 
 module.exports = router;
