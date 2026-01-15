@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import {
   LayoutDashboard,
   Calendar,
@@ -11,8 +13,10 @@ import {
   PanelRightOpen,
   PanelRightClose,
 } from 'lucide-react'
-import Link from 'next/link'
+
 import Overview from './components/Overview'
+import { useAuth } from '../../src/shared/hooks/useAuth'
+import type { UserRole } from '../../src/shared/types'
 
 type Section =
   | 'overview'
@@ -30,8 +34,49 @@ interface NavItem {
 }
 
 export default function Dashboard() {
+  const router = useRouter()
+  const { user, isAuthenticated, loading } = useAuth()
+
   const [activeSection, setActiveSection] = useState<Section>('overview')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  /* ---------------- AUTHENTICATION ---------------- */
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/login')
+    }
+  }, [loading, isAuthenticated, router])
+
+  // Role-based redirect
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      const role = (user as any)?.role as UserRole
+
+      if (role === 'teacher') {
+        router.push('/teacher/dashboard')
+      } else if (role === 'organization_admin') {
+        router.push('/admin/dashboard')
+      }
+    }
+  }, [loading, isAuthenticated, user, router])
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-600 text-lg">Loading...</div>
+      </div>
+    )
+  }
+
+  // Prevent render during redirect
+  if (!isAuthenticated) {
+    return null
+  }
+
+  /* ---------------- UI ---------------- */
 
   const navItems: NavItem[] = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
@@ -45,7 +90,7 @@ export default function Dashboard() {
   const renderSection = () => {
     switch (activeSection) {
       case 'overview':
-        return <Overview />;
+        return <Overview />
       default:
         return <Overview />
     }
@@ -53,7 +98,7 @@ export default function Dashboard() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-      {/* Header (UNCHANGED THEME) */}
+      {/* Header */}
       <header className="h-[73px] bg-[#202020] text-white px-5 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-4">
           <button
@@ -90,36 +135,31 @@ export default function Dashboard() {
         {/* Sidebar */}
         <aside
           className={`
-    ${sidebarCollapsed ? 'w-16' : 'w-64'}
-    bg-white border-r border-gray-200
-    transition-all duration-300 ease-in-out
-    flex flex-col
-  `}
+            ${sidebarCollapsed ? 'w-16' : 'w-64'}
+            bg-white border-r border-gray-200
+            transition-all duration-300 ease-in-out
+            flex flex-col
+          `}
         >
-
-
-          {/* Nav */}
           <nav className="flex-1 px-2 py-4 space-y-1">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${activeSection === item.id
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
+                  activeSection === item.id
+                    ? 'bg-blue-50 text-blue-600 font-medium'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
               >
                 {item.icon}
                 {!sidebarCollapsed && <span>{item.label}</span>}
               </button>
             ))}
           </nav>
-
-
-
         </aside>
 
-        {/* Main Content (DYNAMIC WIDTH) */}
+        {/* Main Content */}
         <main className="flex-1 overflow-auto p-6 lg:p-8">
           {renderSection()}
         </main>
