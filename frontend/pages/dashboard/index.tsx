@@ -13,11 +13,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Overview from './components/Overview'
-import Resources from './components/Resources'
-import Messages from './components/Messages'
-import SettingsSection from './components/Settings'
-import CalendarSection from './components/CalendarSection'
-import Assignments from './components/Assignments'
 
 type Section =
   | 'overview'
@@ -51,16 +46,6 @@ export default function Dashboard() {
     switch (activeSection) {
       case 'overview':
         return <Overview />;
-      case 'calendar':
-        return <CalendarSection />;
-      case 'projects':
-        return <Assignments />;
-      case 'resources':
-        return <Resources />;
-      case 'messages':
-        return <Messages />;
-      case 'settings':
-        return <SettingsSection />;
       default:
         return <Overview />
     }
