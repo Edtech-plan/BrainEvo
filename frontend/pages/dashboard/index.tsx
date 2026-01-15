@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import {
   LayoutDashboard,
-  BookOpen,
   Calendar,
   FolderKanban,
   Library,
@@ -13,13 +12,12 @@ import {
   PanelRightClose,
 } from 'lucide-react'
 import Link from 'next/link'
-import Overview from './Overview'
-import MyLearning from './MyLearning'
-import Projects from './Projects'
-import Resources from './Resources'
-import Messages from './Messages'
-import SettingsSection from './Settings'
-import CalendarSection from './CalendarSection'
+import Overview from './components/Overview'
+import Resources from './components/Resources'
+import Messages from './components/Messages'
+import SettingsSection from './components/Settings'
+import CalendarSection from './components/CalendarSection'
+import Assignments from './components/Assignments'
 
 type Section =
   | 'overview'
@@ -42,9 +40,8 @@ export default function Dashboard() {
 
   const navItems: NavItem[] = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
-    { id: 'learning', label: 'My Learning', icon: <BookOpen size={20} /> },
     { id: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
-    { id: 'projects', label: 'Projects', icon: <FolderKanban size={20} /> },
+    { id: 'projects', label: 'Assignments', icon: <FolderKanban size={20} /> },
     { id: 'resources', label: 'Resources', icon: <Library size={20} /> },
     { id: 'messages', label: 'Messages', icon: <Bell size={20} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
@@ -53,13 +50,11 @@ export default function Dashboard() {
   const renderSection = () => {
     switch (activeSection) {
       case 'overview':
-        return <Overview />
-      case 'learning':
-        return <MyLearning />;
+        return <Overview />;
       case 'calendar':
         return <CalendarSection />;
       case 'projects':
-        return <Projects />;
+        return <Assignments />;
       case 'resources':
         return <Resources />;
       case 'messages':
