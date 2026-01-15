@@ -2,7 +2,7 @@
  * Google OAuth Utility Functions
  */
 
-import type { GoogleAuthData } from '../types';
+import type { GoogleAuthData, GoogleCredentialResponse } from '../types';
 
 /**
  * Initialize Google Sign-In
@@ -25,7 +25,7 @@ export const initializeGoogleSignIn = (): void => {
  * Handle Google Sign-In callback
  * This extracts user data from the Google credential response
  */
-export const handleGoogleSignIn = (credentialResponse: any): GoogleAuthData | null => {
+export const handleGoogleSignIn = (credentialResponse: GoogleCredentialResponse): GoogleAuthData | null => {
   try {
     // Decode the JWT token to get user info
     // Note: In production, you should verify this token on the backend
@@ -65,12 +65,12 @@ export const renderGoogleButton = (
 
   // Wait for Google script to load
   const checkGoogle = setInterval(() => {
-    if ((window as any).google) {
+    if (window.google) {
       clearInterval(checkGoogle);
 
-      (window as any).google.accounts.id.initialize({
+      window.google.accounts.id.initialize({
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-        callback: (response: any) => {
+        callback: (response: GoogleCredentialResponse) => {
           const userData = handleGoogleSignIn(response);
           if (userData) {
             onSuccess(userData);
@@ -80,7 +80,7 @@ export const renderGoogleButton = (
         },
       });
 
-      (window as any).google.accounts.id.renderButton(
+      window.google.accounts.id.renderButton(
         document.getElementById(elementId),
         {
           theme: 'outline',

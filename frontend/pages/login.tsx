@@ -7,7 +7,9 @@ import { useAuth } from '../src/shared/hooks/useAuth';
 import { Input, Button } from '../src/shared/components/ui';
 import { initializeGoogleSignIn, handleGoogleSignIn as parseGoogleCredential } from '../src/shared/utils/googleAuth';
 import authService from '../src/modules/auth/auth.service';
-import type { GoogleAuthData } from '../src/shared/types';
+import type { GoogleAuthData, GooglePromptNotification, GoogleCredentialResponse } from '../src/shared/types';
+import type { AppErrorType } from '../src/shared/types/errors.types';
+import { getErrorMessage } from '../src/shared/types/errors.types';
 
 const Login: NextPage = () => {
   const router = useRouter();
@@ -91,8 +93,8 @@ const Login: NextPage = () => {
       } else {
         router.push('/dashboard');
       }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Login failed. Please try again.');
+    } catch (error: AppErrorType) {
+      setErrorMessage(getErrorMessage(error) || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +103,8 @@ const Login: NextPage = () => {
   // Handle Google Sign-In
   const handleGoogleSignIn = async () => {
     try {
-      if ((window as any).google) {
-        (window as any).google.accounts.id.prompt(async (notification: any) => {
+      if (window.google) {
+        window.google.accounts.id.prompt(async (notification: GooglePromptNotification) => {
           if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
             // If prompt is not displayed, try to get credential from button
             // For now, show error
@@ -111,9 +113,9 @@ const Login: NextPage = () => {
         });
 
         // Listen for credential response
-        (window as any).google.accounts.id.initialize({
+        window.google.accounts.id.initialize({
           client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-          callback: async (response: any) => {
+          callback: async (response: GoogleCredentialResponse) => {
             try {
               const userData = parseGoogleCredential(response);
               if (!userData) {
@@ -141,8 +143,8 @@ const Login: NextPage = () => {
                   router.push('/dashboard');
                 }
               }
-            } catch (error: any) {
-              setErrorMessage(error.response?.data?.message || 'Google sign-in failed. Please try again.');
+            } catch (error: AppErrorType) {
+              setErrorMessage(getErrorMessage(error) || 'Google sign-in failed. Please try again.');
             } finally {
               setIsLoading(false);
             }
@@ -151,8 +153,8 @@ const Login: NextPage = () => {
       } else {
         setErrorMessage('Google Sign-In is not available. Please use email login.');
       }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Google sign-in failed. Please try again.');
+    } catch (error: AppErrorType) {
+      setErrorMessage(getErrorMessage(error) || 'Google sign-in failed. Please try again.');
     }
   };
 

@@ -11,8 +11,10 @@ import TeacherForm from '../src/shared/components/auth/TeacherForm';
 import AdminForm from '../src/shared/components/auth/AdminForm';
 import { initializeGoogleSignIn, handleGoogleSignIn } from '../src/shared/utils/googleAuth';
 import invitationService from '../src/modules/invitation/invitation.service';
-import type { UserRole, RegisterUserData, GoogleAuthData } from '../src/shared/types';
+import type { UserRole, RegisterUserData, GoogleAuthData, GooglePromptNotification } from '../src/shared/types';
 import type { LearnerFormData, TeacherFormData, AdminFormData, FormErrors, InvitationData } from '../src/shared/types/forms.types';
+import type { AppErrorType } from '../src/shared/types/errors.types';
+import { getErrorMessage } from '../src/shared/types/errors.types';
 
 const Register: NextPage = () => {
   const router = useRouter();
@@ -87,8 +89,8 @@ const Register: NextPage = () => {
           } else {
             setErrorMessage('Invalid or expired invitation link.');
           }
-        } catch (error: any) {
-          setErrorMessage(error.response?.data?.message || 'Invalid invitation link.');
+        } catch (error: AppErrorType) {
+          setErrorMessage(getErrorMessage(error) || 'Invalid invitation link.');
         } finally {
           setIsVerifyingInvite(false);
         }
@@ -218,8 +220,8 @@ const Register: NextPage = () => {
     try {
       // This will be handled by Google's button callback
       // For now, we'll use a simple approach
-      if ((window as any).google) {
-        (window as any).google.accounts.id.prompt((notification: any) => {
+      if (window.google) {
+        window.google.accounts.id.prompt((notification: GooglePromptNotification) => {
           if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
             setErrorMessage('Google Sign-In is not available. Please use email registration.');
           }
@@ -227,8 +229,8 @@ const Register: NextPage = () => {
       } else {
         setErrorMessage('Google Sign-In is not available. Please use email registration.');
       }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Google sign-up failed. Please try again.');
+    } catch (error: AppErrorType) {
+      setErrorMessage(getErrorMessage(error) || 'Google sign-up failed. Please try again.');
     }
   };
 
@@ -304,8 +306,8 @@ const Register: NextPage = () => {
       } else {
         router.push('/dashboard');
       }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Registration failed. Please try again.');
+    } catch (error: AppErrorType) {
+      setErrorMessage(getErrorMessage(error) || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

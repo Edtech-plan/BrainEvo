@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../lib/axios';
+import type { AppErrorType } from '../types/errors.types';
+import { getErrorMessage } from '../types/errors.types';
 
 /**
  * API Hook
@@ -13,10 +15,10 @@ export const useApi = <T>(url: string) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.get(url);
+        const response = await apiClient.get<T>(url);
         setData(response.data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: AppErrorType) {
+        setError(getErrorMessage(err) || 'Failed to fetch data');
       } finally {
         setLoading(false);
       }

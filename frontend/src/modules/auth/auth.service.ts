@@ -1,27 +1,27 @@
 import apiClient from '../../shared/lib/axios';
-import type { GoogleAuthData } from '../../shared/types';
+import type { GoogleAuthData, RegisterUserData, AuthResponse, ApiResponse, User } from '../../shared/types';
 
 /**
  * Auth Service
  */
 class AuthService {
-  async register(userData: any) {
-    const response = await apiClient.post('/api/auth/register', userData);
+  async register(userData: RegisterUserData): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/api/auth/register', userData);
     return response.data;
   }
 
-  async login(email: string, password: string) {
-    const response = await apiClient.post('/api/auth/login', { email, password });
+  async login(email: string, password: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/api/auth/login', { email, password });
     return response.data;
   }
 
-  async googleAuth(googleData: GoogleAuthData) {
-    const response = await apiClient.post('/api/auth/google', googleData);
+  async googleAuth(googleData: GoogleAuthData): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/api/auth/google', googleData);
     return response.data;
   }
 
-  async getMe() {
-    const response = await apiClient.get('/api/auth/me');
+  async getMe(): Promise<ApiResponse<{ user: User }>> {
+    const response = await apiClient.get<ApiResponse<{ user: User }>>('/api/auth/me');
     return response.data;
   }
 }

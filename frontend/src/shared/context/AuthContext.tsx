@@ -1,19 +1,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authService from '../../modules/auth/auth.service';
+import type { User, RegisterUserData } from '../types';
+import type { AppErrorType } from '../types/errors.types';
+import { getErrorMessage } from '../types/errors.types';
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (userData: { name: string; email: string; password: string; role?: string; [key: string]: any }) => Promise<void>;
+  register: (userData: RegisterUserData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -29,8 +32,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         try {
           const response = await authService.getMe();
-          if (response.success && response.user) {
-            setUser(response.user);
+          if (response.success && response.data?.user) {
+            setUser(response.data.user);
             setIsAuthenticated(true);
           }
         } catch (error) {
@@ -54,12 +57,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(response.user);
         setIsAuthenticated(true);
       }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+    } catch (error: AppErrorType) {
+      throw new Error(getErrorMessage(error) || 'Login failed');
     }
   };
 
-  const register = async (userData: { name: string; email: string; password: string; role?: string; [key: string]: any }) => {
+  const register = async (userData: RegisterUserData) => {
     try {
       const response = await authService.register(userData);
       if (response.success && response.token) {
@@ -70,8 +73,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(response.user);
         setIsAuthenticated(true);
       }
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+    } catch (error: AppErrorType) {
+      throw new Error(getErrorMessage(error) || 'Registration failed');
     }
   };
 

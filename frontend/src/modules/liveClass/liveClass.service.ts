@@ -1,26 +1,27 @@
 import apiClient from '../../shared/lib/axios';
+import type { LiveClass, CreateLiveClassData, UpdateLiveClassData, ApiResponse } from '../../shared/types';
 
 /**
  * Live Class Service
  */
 class LiveClassService {
-  async getLiveClasses() {
-    const response = await apiClient.get('/api/live-classes');
+  async getLiveClasses(): Promise<ApiResponse<LiveClass[]>> {
+    const response = await apiClient.get<ApiResponse<LiveClass[]>>('/api/live-classes');
     return response.data;
   }
 
-  async getLiveClass(id: string) {
-    const response = await apiClient.get(`/api/live-classes/${id}`);
+  async getLiveClass(id: string): Promise<ApiResponse<LiveClass>> {
+    const response = await apiClient.get<ApiResponse<LiveClass>>(`/api/live-classes/${id}`);
     return response.data;
   }
 
-  async createLiveClass(liveClassData: any) {
-    const response = await apiClient.post('/api/live-classes', liveClassData);
+  async createLiveClass(liveClassData: CreateLiveClassData): Promise<ApiResponse<LiveClass>> {
+    const response = await apiClient.post<ApiResponse<LiveClass>>('/api/live-classes', liveClassData);
     return response.data;
   }
 
-  async updateLiveClass(id: string, liveClassData: any) {
-    const response = await apiClient.put(`/api/live-classes/${id}`, liveClassData);
+  async updateLiveClass(id: string, liveClassData: UpdateLiveClassData): Promise<ApiResponse<LiveClass>> {
+    const response = await apiClient.put<ApiResponse<LiveClass>>(`/api/live-classes/${id}`, liveClassData);
     return response.data;
   }
 

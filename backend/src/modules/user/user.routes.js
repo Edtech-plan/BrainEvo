@@ -9,7 +9,7 @@ router.use(auth);
 
 // @route   GET /api/users
 // @desc    Get all users
-router.get('/', authorize('admin', 'teacher'), getUsers);
+router.get('/', authorize('organization_admin', 'teacher'), getUsers);
 
 // @route   GET /api/users/:id
 // @desc    Get single user
@@ -21,6 +21,6 @@ router.put('/:id', updateUser);
 
 // @route   DELETE /api/users/:id
 // @desc    Delete user
-router.delete('/:id', authorize('admin'), deleteUser);
+router.delete('/:id', authorize('organization_admin'), deleteUser);
 
 module.exports = router;
