@@ -4,68 +4,235 @@ import type { NextPage } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '../src/shared/hooks/useAuth';
-import { Input, Button } from '../src/shared/components/ui';
+import { Button } from '../src/shared/components/ui';
+import RoleSelector from '../src/shared/components/auth/RoleSelector';
+import LearnerForm from '../src/shared/components/auth/LearnerForm';
+import TeacherForm from '../src/shared/components/auth/TeacherForm';
+import AdminForm from '../src/shared/components/auth/AdminForm';
+import { initializeGoogleSignIn, handleGoogleSignIn } from '../src/shared/utils/googleAuth';
+import invitationService from '../src/modules/invitation/invitation.service';
+import type { UserRole, RegisterUserData, GoogleAuthData } from '../src/shared/types';
+import type { LearnerFormData, TeacherFormData, AdminFormData, FormErrors, InvitationData } from '../src/shared/types/forms.types';
 
 const Register: NextPage = () => {
   const router = useRouter();
   const { register, isAuthenticated, loading: authLoading } = useAuth();
-  const [formData, setFormData] = useState({
+
+  // State
+  const [selectedRole, setSelectedRole] = useState<UserRole | ''>('');
+  const [inviteData, setInviteData] = useState<InvitationData | null>(null);
+  const [isVerifyingInvite, setIsVerifyingInvite] = useState(false);
+  const [learnerData, setLearnerData] = useState<LearnerFormData>({
     name: '',
     email: '',
     password: '',
   });
-  const [errors, setErrors] = useState<{
-    name?: string;
-    email?: string;
-    password?: string;
-  }>({});
+  const [teacherData, setTeacherData] = useState<TeacherFormData>({
+    name: '',
+    email: '',
+    password: '',
+    qualifications: '',
+    subjectsTaught: '',
+  });
+  const [adminData, setAdminData] = useState<AdminFormData>({
+    name: '',
+    email: '',
+    password: '',
+    organizationName: '',
+    contactEmail: '',
+    contactPhone: '',
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Initialize Google Sign-In
+  useEffect(() => {
+    initializeGoogleSignIn();
+  }, []);
+
+  // Check for invitation token in URL
+  useEffect(() => {
+    const verifyInviteToken = async () => {
+      const { token } = router.query;
+      if (token && typeof token === 'string') {
+        setIsVerifyingInvite(true);
+        try {
+          const response = await invitationService.verifyInvitation(token);
+          if (response.success && response.invitation) {
+            // Convert Invitation to InvitationData format
+            const orgId = typeof response.invitation.organizationId === 'string'
+              ? { id: response.invitation.organizationId, name: '' }
+              : { id: response.invitation.organizationId.id, name: response.invitation.organizationId.name || '' };
+
+            setInviteData({
+              id: response.invitation.id,
+              organizationId: orgId,
+              email: response.invitation.email,
+              role: response.invitation.role,
+              token: response.invitation.token,
+              expiresAt: response.invitation.expiresAt,
+              isUsed: response.invitation.isUsed,
+            });
+            setSelectedRole(response.invitation.role);
+            // Pre-fill email if available
+            if (response.invitation.email) {
+              if (response.invitation.role === 'learner') {
+                setLearnerData(prev => ({ ...prev, email: response.invitation.email }));
+              } else if (response.invitation.role === 'teacher') {
+                setTeacherData(prev => ({ ...prev, email: response.invitation.email }));
+              }
+            }
+          } else {
+            setErrorMessage('Invalid or expired invitation link.');
+          }
+        } catch (error: any) {
+          setErrorMessage(error.response?.data?.message || 'Invalid invitation link.');
+        } finally {
+          setIsVerifyingInvite(false);
+        }
+      }
+    };
+
+    if (router.isReady) {
+      verifyInviteToken();
+    }
+  }, [router.isReady, router.query]);
 
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.push('/dashboard');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role === 'learner') {
+        router.push('/dashboard');
+      } else if (user.role === 'teacher') {
+        router.push('/teacher/dashboard');
+      } else if (user.role === 'organization_admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     }
   }, [isAuthenticated, authLoading, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle role change
+  const handleRoleChange = (role: UserRole) => {
+    setSelectedRole(role);
+    setErrors({});
+    setErrorMessage('');
+  };
+
+  // Handle form field changes
+  const handleLearnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    setLearnerData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
     }
     setErrorMessage('');
   };
 
-  const validate = () => {
-    const newErrors: {
-      name?: string;
-      email?: string;
-      password?: string;
-    } = {};
+  const handleTeacherChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setTeacherData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+    setErrorMessage('');
+  };
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+  const handleAdminChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setAdminData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+    setErrorMessage('');
+  };
+
+  // Validation
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!selectedRole) {
+      setErrorMessage('Please select a role.');
+      return false;
     }
 
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    if (selectedRole === 'learner') {
+      if (!learnerData.name.trim()) newErrors.name = 'Name is required';
+      if (!learnerData.email) {
+        newErrors.email = 'Email is required';
+      } else if (!/\S+@\S+\.\S+/.test(learnerData.email)) {
+        newErrors.email = 'Email is invalid';
+      }
+      if (!learnerData.password) {
+        newErrors.password = 'Password is required';
+      } else if (learnerData.password.length < 6) {
+        newErrors.password = 'Password must be at least 6 characters';
+      }
+    } else if (selectedRole === 'teacher') {
+      if (!teacherData.name.trim()) newErrors.name = 'Name is required';
+      if (!teacherData.email) {
+        newErrors.email = 'Email is required';
+      } else if (!/\S+@\S+\.\S+/.test(teacherData.email)) {
+        newErrors.email = 'Email is invalid';
+      }
+      if (!teacherData.password) {
+        newErrors.password = 'Password is required';
+      } else if (teacherData.password.length < 6) {
+        newErrors.password = 'Password must be at least 6 characters';
+      }
+    } else if (selectedRole === 'organization_admin') {
+      if (!adminData.organizationName.trim()) newErrors.organizationName = 'Organization name is required';
+      if (!adminData.name.trim()) newErrors.name = 'Name is required';
+      if (!adminData.email) {
+        newErrors.email = 'Email is required';
+      } else if (!/\S+@\S+\.\S+/.test(adminData.email)) {
+        newErrors.email = 'Email is invalid';
+      }
+      if (!adminData.password) {
+        newErrors.password = 'Password is required';
+      } else if (adminData.password.length < 6) {
+        newErrors.password = 'Password must be at least 6 characters';
+      }
+      if (!adminData.contactEmail) {
+        newErrors.contactEmail = 'Contact email is required';
+      } else if (!/\S+@\S+\.\S+/.test(adminData.contactEmail)) {
+        newErrors.contactEmail = 'Contact email is invalid';
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle Google Sign-Up
+  const handleGoogleSignUp = async () => {
+    if (!selectedRole) {
+      setErrorMessage('Please select a role first.');
+      return;
+    }
+
+    try {
+      // This will be handled by Google's button callback
+      // For now, we'll use a simple approach
+      if ((window as any).google) {
+        (window as any).google.accounts.id.prompt((notification: any) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            setErrorMessage('Google Sign-In is not available. Please use email registration.');
+          }
+        });
+      } else {
+        setErrorMessage('Google Sign-In is not available. Please use email registration.');
+      }
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Google sign-up failed. Please try again.');
+    }
+  };
+
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
@@ -76,12 +243,67 @@ const Register: NextPage = () => {
 
     setIsLoading(true);
     try {
+      let registerData: RegisterUserData;
+
+      if (selectedRole === 'learner') {
+        registerData = {
+          name: learnerData.name,
+          email: learnerData.email,
+          password: learnerData.password,
+          role: 'learner',
+          inviteToken: inviteData?.token,
+        };
+      } else if (selectedRole === 'teacher') {
+        registerData = {
+          name: teacherData.name,
+          email: teacherData.email,
+          password: teacherData.password,
+          role: 'teacher',
+          qualifications: teacherData.qualifications || undefined,
+          subjectsTaught: teacherData.subjectsTaught
+            ? teacherData.subjectsTaught.split(',').map(s => s.trim()).filter(Boolean)
+            : undefined,
+          inviteToken: inviteData?.token,
+        };
+      } else {
+        registerData = {
+          name: adminData.name,
+          email: adminData.email,
+          password: adminData.password,
+          role: 'organization_admin',
+          organizationId: undefined, // Will be created on backend
+        };
+      }
+
+      // Ensure password is always a string for register function
+      if (!registerData.password) {
+        setErrorMessage('Password is required');
+        setIsLoading(false);
+        return;
+      }
+
       await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
+        name: registerData.name,
+        email: registerData.email,
+        password: registerData.password,
+        role: registerData.role,
+        ...(registerData.qualifications && { qualifications: registerData.qualifications }),
+        ...(registerData.subjectsTaught && { subjectsTaught: registerData.subjectsTaught }),
+        ...(registerData.inviteToken && { inviteToken: registerData.inviteToken }),
+        ...(registerData.organizationId && { organizationId: registerData.organizationId }),
       });
-      router.push('/dashboard');
+
+      // Redirect based on role
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role === 'learner') {
+        router.push('/dashboard');
+      } else if (user.role === 'teacher') {
+        router.push('/teacher/dashboard');
+      } else if (user.role === 'organization_admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error: any) {
       setErrorMessage(error.message || 'Registration failed. Please try again.');
     } finally {
@@ -89,7 +311,7 @@ const Register: NextPage = () => {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || isVerifyingInvite) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-gray-600 text-lg">Loading...</div>
@@ -101,8 +323,8 @@ const Register: NextPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen">
         {/* Left Side - Form Container */}
-        <div className="flex-1 flex items-center justify-center p-8 md:p-12 lg:p-16">
-          <div className="w-full max-w-md">
+        <div className="flex-1 flex items-center justify-center p-8 md:p-12 lg:p-16 overflow-y-auto">
+          <div className="w-full max-w-lg">
             <div className="mb-8">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                 Get Started with BrainEvo!
@@ -121,6 +343,7 @@ const Register: NextPage = () => {
             {/* Sign up with Google Button */}
             <button
               type="button"
+              onClick={handleGoogleSignUp}
               className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-3 hover:bg-gray-700 transition-colors mb-6"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -150,83 +373,71 @@ const Register: NextPage = () => {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">or</span>
+                <span className="px-2 bg-gray-50 text-gray-500">or</span>
               </div>
             </div>
 
+            {/* Role Selector */}
+            <RoleSelector
+              selectedRole={selectedRole}
+              onRoleChange={handleRoleChange}
+              disabled={!!inviteData}
+            />
+
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleChange}
-                error={errors.name}
-                required
-                className="text-base"
-              />
-
-              <Input
-                type="email"
-                name="email"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-                error={errors.email}
-                required
-                className="text-base"
-              />
-
-              <div className="relative">
-                <Input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={errors.password}
-                  required
-                  className="text-base pr-10"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  onClick={() => {
-                    const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
-                    if (passwordInput) {
-                      passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-                    }
-                  }}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-              </div>
-
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full font-semibold text-base py-3"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Creating account...
-                  </span>
-                ) : (
-                  'Sign Up'
+            {selectedRole && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {selectedRole === 'learner' && (
+                  <LearnerForm
+                    formData={learnerData}
+                    errors={errors}
+                    onChange={handleLearnerChange}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
                 )}
-              </Button>
-            </form>
+
+                {selectedRole === 'teacher' && (
+                  <TeacherForm
+                    formData={teacherData}
+                    errors={errors}
+                    onChange={handleTeacherChange}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
+                )}
+
+                {selectedRole === 'organization_admin' && (
+                  <AdminForm
+                    formData={adminData}
+                    errors={errors}
+                    onChange={handleAdminChange}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
+                )}
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  className="w-full font-semibold text-base py-3"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating account...
+                    </span>
+                  ) : (
+                    'Sign Up'
+                  )}
+                </Button>
+              </form>
+            )}
 
             {/* Footer Links */}
             <div className="mt-6 text-center text-sm">
