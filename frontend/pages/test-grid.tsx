@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { NextPage } from 'next';
 import { DataGrid } from '../src/shared/components/ui';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, ICellRendererParams } from 'ag-grid-community';
 
 // Sample data for testing
 const sampleUsers = [
@@ -20,8 +20,8 @@ const sampleCourses = [
 ];
 
 const TestGrid: NextPage = () => {
-  const [selectedRows, setSelectedRows] = useState<any[]>([]);
-  const [clickedRow, setClickedRow] = useState<any>(null);
+  const [selectedRows, setSelectedRows] = useState<Record<string, never>[]>([]);
+  const [clickedRow, setClickedRow] = useState<Record<string, never> | null>(null);
 
   // Column definitions for Users
   const userColumns: ColDef[] = [
@@ -33,7 +33,7 @@ const TestGrid: NextPage = () => {
       field: 'status',
       headerName: 'Status',
       width: 120,
-      cellRenderer: (params: any) => {
+      cellRenderer: (params: ICellRendererParams) => {
         const status = params.value;
         return status === 'Active' ? '✅ Active' : '❌ Inactive';
       },
@@ -50,7 +50,7 @@ const TestGrid: NextPage = () => {
       field: 'status',
       headerName: 'Status',
       width: 120,
-      cellRenderer: (params: any) => {
+      cellRenderer: (params: ICellRendererParams) => {
         const status = params.value;
         return status === 'Active' ? '✅ Active' : '📝 Draft';
       },

@@ -49,7 +49,7 @@ export default function Dashboard() {
   // Role-based redirect
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
-      const role = (user as any)?.role as UserRole
+      const role = user.role as UserRole
 
       if (role === 'teacher') {
         router.push('/teacher/dashboard')

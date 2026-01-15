@@ -1,26 +1,27 @@
 import apiClient from '../../shared/lib/axios';
+import type { Assignment, CreateAssignmentData, UpdateAssignmentData, ApiResponse } from '../../shared/types';
 
 /**
  * Assignment Service
  */
 class AssignmentService {
-  async getAssignments() {
-    const response = await apiClient.get('/api/assignments');
+  async getAssignments(): Promise<ApiResponse<Assignment[]>> {
+    const response = await apiClient.get<ApiResponse<Assignment[]>>('/api/assignments');
     return response.data;
   }
 
-  async getAssignment(id: string) {
-    const response = await apiClient.get(`/api/assignments/${id}`);
+  async getAssignment(id: string): Promise<ApiResponse<Assignment>> {
+    const response = await apiClient.get<ApiResponse<Assignment>>(`/api/assignments/${id}`);
     return response.data;
   }
 
-  async createAssignment(assignmentData: any) {
-    const response = await apiClient.post('/api/assignments', assignmentData);
+  async createAssignment(assignmentData: CreateAssignmentData): Promise<ApiResponse<Assignment>> {
+    const response = await apiClient.post<ApiResponse<Assignment>>('/api/assignments', assignmentData);
     return response.data;
   }
 
-  async updateAssignment(id: string, assignmentData: any) {
-    const response = await apiClient.put(`/api/assignments/${id}`, assignmentData);
+  async updateAssignment(id: string, assignmentData: UpdateAssignmentData): Promise<ApiResponse<Assignment>> {
+    const response = await apiClient.put<ApiResponse<Assignment>>(`/api/assignments/${id}`, assignmentData);
     return response.data;
   }
 

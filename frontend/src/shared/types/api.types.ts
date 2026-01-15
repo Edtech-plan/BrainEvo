@@ -2,7 +2,7 @@
  * API Response Types
  */
 
-export interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = Record<string, never>> {
   success: boolean;
   data?: T;
   message?: string;

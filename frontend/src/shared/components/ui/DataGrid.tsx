@@ -4,13 +4,13 @@ import { ColDef, GridOptions } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
-interface DataGridProps<T = any> {
+interface DataGridProps<T = Record<string, never>> {
   rowData: T[];
   columnDefs: ColDef[];
   gridOptions?: GridOptions;
   className?: string;
   loading?: boolean;
-  onRowClicked?: (row: any) => void;
+  onRowClicked?: (row: T) => void;
   onSelectionChanged?: (selectedRows: T[]) => void;
   pagination?: boolean;
   paginationPageSize?: number;
@@ -18,7 +18,7 @@ interface DataGridProps<T = any> {
   enableSorting?: boolean;
 }
 
-export function DataGrid<T = any>({
+export function DataGrid<T = Record<string, never>>({
   rowData,
   columnDefs,
   gridOptions,
