@@ -1,23 +1,31 @@
+import ActionButton from "@/shared/components/live/ActionButton";
+
+
 function ClassSnapshot() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
-        My Class
-      </h2>
+    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm h-full flex flex-col">
+      <div className="mb-4">
+        <h2 className="text-lg font-bold text-slate-900">Current Batch</h2>
+        <p className="text-sm text-slate-500">Full Stack Development</p>
+      </div>
 
-      <div className="space-y-3">
-        <p className="text-gray-700 font-medium">
-          Full Stack Development – Batch A
-        </p>
-        <p className="text-sm text-gray-600">
-          Instructor: John Doe
-        </p>
-        <p className="text-sm text-gray-600">
-          Next Live Class: Tomorrow, 6:00 PM
-        </p>
-        <p className="text-sm text-gray-600">
-          Attendance: <span className="font-medium">92%</span>
-        </p>
+      <div className="space-y-4 flex-grow">
+        <div className="flex justify-between items-center py-2 border-b border-slate-50">
+           <span className="text-slate-600 text-sm">Batch</span>
+           <span className="font-medium text-slate-900">Batch A</span>
+        </div>
+        <div className="flex justify-between items-center py-2 border-b border-slate-50">
+           <span className="text-slate-600 text-sm">Instructor</span>
+           <span className="font-medium text-slate-900">John Doe</span>
+        </div>
+        <div className="flex justify-between items-center py-2 border-b border-slate-50">
+           <span className="text-slate-600 text-sm">Next Class</span>
+           <span className="font-medium text-blue-600">Tomorrow, 6:00 PM</span>
+        </div>
+      </div>
+      
+      <div className="mt-6">
+        <ActionButton label="View Course Details" variant="outline" />
       </div>
     </div>
   );

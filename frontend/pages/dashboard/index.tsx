@@ -9,16 +9,18 @@ import {
   Library,
   Bell,
   Settings,
+  Video,
 } from 'lucide-react'
 
 import Overview from './components/Overview'
 import { useAuth } from '../../src/shared/hooks/useAuth'
 import { DashboardLayout } from '../../src/shared/components/layout'
 import type { UserRole } from '../../src/shared/types'
+import LiveClasses from '../live/LiveClasses'
 
 type Section =
   | 'overview'
-  | 'learning'
+  | 'live'
   | 'calendar'
   | 'projects'
   | 'resources'
@@ -77,6 +79,7 @@ export default function Dashboard() {
 
   const navItems: NavItem[] = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
+    { id: 'live', label: 'Live Classes', icon: <Video size={20} /> },
     { id: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
     { id: 'projects', label: 'Assignments', icon: <FolderKanban size={20} /> },
     { id: 'resources', label: 'Resources', icon: <Library size={20} /> },
@@ -88,6 +91,8 @@ export default function Dashboard() {
     switch (activeSection) {
       case 'overview':
         return <Overview />
+      case 'live':
+        return <LiveClasses />
       default:
         return <Overview />
     }

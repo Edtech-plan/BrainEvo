@@ -17,15 +17,19 @@ export default function StatCard({
 }: StatCardProps) {
   return (
     <div
-      className={`bg-white rounded-lg p-6 border border-gray-200 hover:shadow-lg transition-shadow ${className}`}
+      /* OPTIMIZATION: Replaced shadow hover with border hover for 60FPS performance */
+      className={`bg-white rounded-xl p-5 border border-slate-200 
+      transition-colors duration-200 hover:border-blue-400 ${className}`}
     >
-      <div
-        className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center mb-4`}
-      >
-        {icon}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-slate-500 text-sm font-medium mb-1">{label}</p>
+          <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h3>
+        </div>
+        <div className={`p-3 rounded-lg ${color} shrink-0`}>
+          {icon}
+        </div>
       </div>
-      <p className="text-gray-600 text-sm mb-1">{label}</p>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
