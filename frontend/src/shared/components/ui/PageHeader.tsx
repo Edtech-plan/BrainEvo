@@ -12,9 +12,15 @@ export default function PageHeader({
   className = '',
 }: PageHeaderProps) {
   return (
-    <div className={className}>
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-      {description && <p className="text-gray-600">{description}</p>}
+    <div className={`mb-8 ${className}`}>
+      <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+        {title}
+      </h1>
+      {description && (
+        <p className="mt-2 text-slate-500 text-base md:text-lg max-w-2xl">
+          {description}
+        </p>
+      )}
     </div>
   );
 }

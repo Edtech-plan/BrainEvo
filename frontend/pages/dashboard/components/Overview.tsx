@@ -8,19 +8,28 @@ import UpcomingSchedule from "./overview/UpcomingSchedule";
 
 function Overview() {
   return (
-    <div className="space-y-6">
-      <OverviewHeader />
+    // OPTIMIZATION: 
+    // 1. h-screen: Forces exact viewport height (prevents overflow glitches).
+    // 2. pb-32: Extra padding at bottom so you can scroll past the last element.
+    <div className="h-screen overflow-y-auto bg-slate-50 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="max-w-7xl mx-auto p-6 space-y-8 pb-32">
+        <OverviewHeader />
 
-      <OverviewStats />
+        <OverviewStats />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ClassSnapshot />
-        <UpcomingSchedule />
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ClassSnapshot />
+              <UpcomingSchedule />
+            </div>
+            <PerformanceSnapshot />
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PerformanceSnapshot />
-        <AttentionAlerts />
+          <div className="lg:col-span-4">
+            <AttentionAlerts />
+          </div>
+        </div>
       </div>
     </div>
   );

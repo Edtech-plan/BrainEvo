@@ -27,7 +27,7 @@ export default function DashboardLayout({
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Header */}
-      <header className="h-[73px] bg-[#202020] text-white px-5 flex items-center justify-between sticky top-0 z-30">
+      <header className="h-[73px] bg-[#202020] text-white px-5 py-4  flex items-center justify-between sticky top-0 z-30">
         {headerContent || (
           <>
             <div className="flex items-center gap-4">
@@ -37,9 +37,9 @@ export default function DashboardLayout({
                 aria-label="Toggle sidebar"
               >
                 {sidebarCollapsed ? (
-                  <PanelRightOpen className="rotate-180" size={20} />
+                  <PanelRightOpen size={25} style={{ transform: 'rotate(180deg)' }}/>
                 ) : (
-                  <PanelRightClose className="rotate-180" size={20} />
+                  <PanelRightClose size={25} style={{ transform: 'rotate(180deg)' }} />
                 )}
               </button>
               <Link href="/dashboard" className="text-2xl font-bold">
@@ -47,13 +47,53 @@ export default function DashboardLayout({
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <button className="relative hover:bg-gray-800 p-2 rounded-md">
-                <Bell size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full" />
-              </button>
-              <div className="w-9 h-9 bg-gray-700 rounded-full flex items-center justify-center text-sm font-semibold">
+            <button
+              style={{
+                position: 'relative',
+                padding: '8px',
+                borderRadius: '6px',
+                backgroundColor: 'transparent',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#1f2937'; // gray-800
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <Bell size={20} />
+
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '4px',
+                  right: '4px',
+                  width: '8px',
+                  height: '8px',
+                  backgroundColor: '#2563eb', // blue-600
+                  borderRadius: '50%',
+                }}
+              />
+            </button>
+
+              <div
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  backgroundColor: '#374151', 
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#ffffff',
+                }}
+              >
                 JD
               </div>
+
             </div>
           </>
         )}

@@ -4,10 +4,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useAuth } from '../src/shared/hooks/useAuth';
+import { BarChart3, Settings, ShieldCheck, PlayCircle, ChevronRight, Menu } from 'lucide-react';
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const { isAuthenticated, loading, logout } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   // Redirect to dashboard if already authenticated
   React.useEffect(() => {
@@ -19,168 +21,217 @@ const Home: NextPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-gray-600">Loading...</div>
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header - Black Navigation Bar */}
-      <header className="bg-[#202020] text-white px-5 py-5 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/logoo.png"
-            alt="BrainEvo Logo"
-            width={80}
-            height={80}
-            className="object-contain"
-          />
-          <span className="text-2xl font-bold">BrainEvo</span>
-        </Link>
-        <nav className="hidden md:flex gap-8">
-          <Link href="/" className="text-white no-underline font-medium hover:text-gray-300">
-            Home
+    <div className="min-h-screen bg-white font-sans text-slate-900">
+      
+      {/* --- Navigation Bar --- */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="relative w-10 h-10">
+              <Image
+                src="/logoo.png"
+                alt="BrainEvo Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500">
+              BrainEvo
+            </span>
           </Link>
-          <Link href="/features" className="text-white no-underline font-medium hover:text-gray-300">
-            Features
-          </Link>
-          <Link href="/pricing" className="text-white no-underline font-medium hover:text-gray-300">
-            Pricing
-          </Link>
-          <Link href="/about" className="text-white no-underline font-medium hover:text-gray-300">
-            About Us
-          </Link>
-          <Link href="/contact" className="text-white no-underline font-medium hover:text-gray-300">
-            Contact
-          </Link>
-        </nav>
-        {isAuthenticated ? (
-          <Link href="/dashboard">
-            <button className="bg-gray-800 text-white px-3 py-1.5 rounded-md border border-gray-400 no-underline hover:bg-gray-700 transition-colors text-sm">
-              Dashboard
-            </button>
-          </Link>
-        ) : (
-          <Link href="/login">
-            <button className="bg-gray-800 text-white px-3 py-1.5 rounded-md border border-gray-400 no-underline hover:bg-gray-700 transition-colors text-sm">
-              Login
-            </button>
-          </Link>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            {['Features', 'Pricing', 'About Us', 'Contact'].map((item) => (
+              <Link 
+                key={item} 
+                href={`/${item.toLowerCase().replace(' ', '-')}`}
+                className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+              >
+                {item}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <button className="px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg">
+                  Go to Dashboard
+                </button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <button className="px-5 py-2.5 rounded-full text-slate-600 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 transition-colors">
+                    Log in
+                  </button>
+                </Link>
+                <Link href="/register">
+                  <button className="px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all hover:shadow-lg hover:-translate-y-0.5">
+                    Get Started
+                  </button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden p-2 text-slate-600"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu size={24} />
+          </button>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-slate-100 p-4 space-y-4 shadow-xl absolute w-full left-0">
+             <nav className="flex flex-col gap-4">
+                <Link href="/features" className="text-slate-600 font-medium">Features</Link>
+                <Link href="/pricing" className="text-slate-600 font-medium">Pricing</Link>
+                <Link href="/login" className="text-blue-600 font-semibold">Login</Link>
+             </nav>
+          </div>
         )}
       </header>
 
-      {/* Hero Section */}
-      <section className="flex items-center justify-between px-8 md:px-12 lg:px-16 py-6 md:py-8 bg-white flex-col md:flex-row gap-8 md:gap-12">
-        <div className="flex-1 w-full md:w-auto">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 text-gray-800 leading-tight">
-            Empowering Education with Cutting-Edge EdTech Solutions
-          </h1>
-          <p className="text-base md:text-lg text-gray-700 mb-4 leading-relaxed">
-            Transform your school or college with our advanced learning platforms designed to enhance engagement and improve outcomes.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/register">
-              <button className="bg-blue-600 text-white px-5 py-2.5 rounded-lg no-underline hover:bg-blue-700 transition-colors font-medium text-sm">
-                Get Started
-              </button>
-            </Link>
-            <Link href="/demo">
-              <button className="bg-white text-black px-5 py-2.5 rounded-lg no-underline hover:bg-gray-50 transition-colors font-medium border border-gray-300 flex items-center gap-2 text-sm">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                </svg>
-                Watch Demo
-              </button>
-            </Link>
-          </div>
+      {/* --- Hero Section --- */}
+      <section className="relative pt-16 pb-24 lg:pt-32 lg:pb-40 overflow-hidden">
+        {/* Background Decor */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl -z-10 pointer-events-none">
+          <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-3xl opacity-60" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-50 rounded-full blur-3xl opacity-60" />
         </div>
-        <div className="flex-shrink-0 w-full md:w-1/2 lg:w-2/5 flex items-center justify-center">
-          {/* Hero Illustration - Load from public folder */}
-          <div className="relative w-full max-w-full">
-            <Image
-              src="/landing.png"
-              alt="Online Learning Illustration"
-              width={700}
-              height={600}
-              className="w-full h-auto object-contain"
-              priority
-            />
+
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Text Content */}
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-6 border border-blue-100 uppercase tracking-wide">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+              </span>
+              New Platform v2.0
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]">
+              Education <br className="hidden lg:block"/>
+              <span className="text-blue-600">Reimagined</span> for the Future.
+            </h1>
+            
+            <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              Transform your institution with BrainEvo’s advanced LMS. analytics, live classes, and engagement tools—all in one place.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <Link href="/register">
+                <button className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2">
+                  Start Free Trial <ChevronRight size={18} />
+                </button>
+              </Link>
+              <Link href="/demo">
+                <button className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-slate-700 font-semibold border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                  <PlayCircle size={20} className="text-blue-600" /> Watch Demo
+                </button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero Image */}
+          <div className="relative lg:h-[600px] w-full flex items-center justify-center">
+             <div className="relative w-full aspect-square max-w-[600px]">
+                <Image
+                  src="/landing.png"
+                  alt="BrainEvo Dashboard Preview"
+                  fill
+                  className="object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 ease-out"
+                  priority
+                />
+             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="flex justify-between px-8 md:px-12 py-4 md:py-6 bg-white flex-col md:flex-row gap-6">
-        <div className="flex-1 text-center">
-          {/* Boost Engagement Icon - Bar graph with upward arrow */}
-          <div className="flex justify-center mb-2">
-            <svg width="50" height="50" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Bar chart bars */}
-              <rect x="15" y="45" width="10" height="25" fill="#374151" rx="2"/>
-              <rect x="30" y="35" width="10" height="35" fill="#374151" rx="2"/>
-              <rect x="45" y="25" width="10" height="45" fill="#374151" rx="2"/>
-              <rect x="60" y="30" width="10" height="40" fill="#374151" rx="2"/>
-              {/* Upward curving arrow */}
-              <path d="M42 15 Q45 12 48 15" stroke="#374151" strokeWidth="3" fill="none" strokeLinecap="round"/>
-              <path d="M48 15 L45 18 L45 22" stroke="#374151" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      {/* --- Features Section --- */}
+      <section className="py-24 bg-slate-50 border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-6">
+          
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Why choose BrainEvo?</h2>
+            <p className="text-slate-600 text-lg">
+              We provide the infrastructure you need to scale education without the technical headaches.
+            </p>
           </div>
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Boost Engagement</h3>
-          <p className="text-sm text-gray-600">
-            Interactive and engaging course content for better student participation.
-          </p>
-        </div>
-        <div className="flex-1 text-center">
-          {/* Streamline Administration Icon - Gear with document */}
-          <div className="flex justify-center mb-2">
-            <svg width="50" height="50" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Outer gear */}
-              <circle cx="40" cy="40" r="25" fill="none" stroke="#374151" strokeWidth="3"/>
-              <circle cx="40" cy="40" r="10" fill="#374151"/>
-              {/* Gear teeth */}
-              <rect x="38" y="10" width="4" height="10" fill="#374151" rx="1"/>
-              <rect x="38" y="60" width="4" height="10" fill="#374151" rx="1"/>
-              <rect x="10" y="38" width="10" height="4" fill="#374151" rx="1"/>
-              <rect x="60" y="38" width="10" height="4" fill="#374151" rx="1"/>
-              {/* Document icon inside */}
-              <rect x="32" y="32" width="16" height="16" rx="2" fill="#374151" opacity="0.4"/>
-              <rect x="34" y="34" width="12" height="3" fill="#374151"/>
-              <rect x="34" y="39" width="8" height="3" fill="#374151"/>
-              <rect x="34" y="44" width="10" height="3" fill="#374151"/>
-            </svg>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <BarChart3 className="w-7 h-7 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Boost Engagement</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Interactive course content, gamification, and real-time feedback loops to keep students hooked.
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-indigo-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Settings className="w-7 h-7 text-indigo-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Streamlined Admin</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Automate attendance, grading, and reporting. Spend less time on paperwork and more on teaching.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-teal-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-7 h-7 text-teal-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Enterprise Security</h3>
+              <p className="text-slate-600 leading-relaxed">
+                Bank-grade encryption and GDPR compliance ensure your student data is always safe and private.
+              </p>
+            </div>
           </div>
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Streamline Administration</h3>
-          <p className="text-sm text-gray-600">
-            Manage courses, students, and analytics with ease.
-          </p>
-        </div>
-        <div className="flex-1 text-center">
-          {/* Secure & Reliable Icon - Shield with gear */}
-          <div className="flex justify-center mb-2">
-            <svg width="50" height="50" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Shield shape */}
-              <path d="M40 10 L15 20 L15 35 C15 50 25 62 40 70 C55 62 65 50 65 35 L65 20 Z" fill="#374151"/>
-              {/* Gear inside shield */}
-              <circle cx="40" cy="40" r="15" fill="none" stroke="white" strokeWidth="2.5"/>
-              <circle cx="40" cy="40" r="5" fill="white"/>
-              <rect x="38" y="22" width="4" height="8" fill="white" rx="1"/>
-              <rect x="38" y="50" width="4" height="8" fill="white" rx="1"/>
-              <rect x="22" y="38" width="8" height="4" fill="white" rx="1"/>
-              <rect x="50" y="38" width="8" height="4" fill="white" rx="1"/>
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold mb-2 text-gray-800">Secure & Reliable</h3>
-          <p className="text-sm text-gray-600">
-            Robust, secure platform ensuring data privacy and reliability.
-          </p>
+
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="text-center py-5 bg-[#202020] text-white">
-        <p className="m-0">&copy; 2024 BrainEvo. All rights reserved.</p>
+      {/* --- Footer --- */}
+      <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-white">BrainEvo</span>
+          </div>
+          
+          <div className="flex gap-8 text-sm font-medium">
+             <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
+             <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
+             <Link href="#" className="hover:text-white transition-colors">Help Center</Link>
+          </div>
+
+          <p className="text-sm">
+            &copy; {new Date().getFullYear()} BrainEvo Inc.
+          </p>
+        </div>
       </footer>
+
     </div>
   );
 };

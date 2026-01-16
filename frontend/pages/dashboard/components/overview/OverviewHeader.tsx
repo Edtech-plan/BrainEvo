@@ -1,10 +1,11 @@
-import { PageHeader } from '../../../../src/shared/components/ui';
+import { PageHeader } from "@/shared/components/ui";
+
 
 function OverviewHeader() {
   return (
     <PageHeader
-      title="Overview"
-      description="Track your attendance, performance, and upcoming activities"
+      title="Dashboard Overview"
+      description="Welcome back, Yash. Here is what is happening with your learning today."
     />
   );
 }
