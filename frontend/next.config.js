@@ -6,6 +6,13 @@ const nextConfig = {
   },
   images: {
     domains: ['localhost'],
+    // Add your production image domains here if needed
+    // remotePatterns: [
+    //   {
+    //     protocol: 'https',
+    //     hostname: 'your-image-domain.com',
+    //   },
+    // ],
   },
   // Only use rewrites in development (local)
   // In production on Vercel, use NEXT_PUBLIC_API_URL directly
