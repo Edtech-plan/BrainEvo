@@ -1,7 +1,9 @@
+// TodayClasses.tsx
+import React from 'react';
 import AttendanceBadge from "@/shared/components/live/AttendanceBadge";
 import ClassCard from "@/shared/components/live/ClassCard";
 import SectionHeader from "@/shared/components/live/SectionHeader";
-
+import { theme } from '@/shared/components/ui/theme';
 
 type AttendanceStatus = 'Present' | 'Late' | 'Absent';
 
@@ -40,11 +42,15 @@ function TodayClasses() {
             time={cls.time}
           >
             {cls.attendance ? (
-              <div className="flex justify-end">
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <AttendanceBadge status={cls.attendance} />
               </div>
             ) : (
-              <div className="text-sm text-slate-400 italic">
+              <div style={{ 
+                fontSize: '14px', 
+                color: theme.colors.textSecondary, 
+                fontStyle: 'italic' 
+              }}>
                 Scheduled
               </div>
             )}

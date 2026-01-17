@@ -1,6 +1,9 @@
+// PastClasses.tsx
+import React from 'react';
 import AttendanceBadge from "@/shared/components/live/AttendanceBadge";
 import ClassCard from "@/shared/components/live/ClassCard";
 import SectionHeader from "@/shared/components/live/SectionHeader";
+import { theme } from '@/shared/components/ui/theme';
 
 type AttendanceStatus = 'Present' | 'Late' | 'Absent';
 
@@ -41,10 +44,24 @@ function PastClasses() {
             teacher={cls.teacher}
             time={cls.time}
           >
-            <div className="flex items-center justify-between mt-2 pt-3 border-t border-slate-100">
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between', 
+              marginTop: '12px', 
+              paddingTop: '12px', 
+              borderTop: `1px solid ${theme.colors.bgMain}` 
+            }}>
               <AttendanceBadge status={cls.attendance} />
               {cls.assignment && (
-                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                <span style={{ 
+                  fontSize: '12px', 
+                  fontWeight: 500, 
+                  color: theme.colors.primary, 
+                  backgroundColor: theme.colors.primaryLight, 
+                  padding: '4px 8px', 
+                  borderRadius: theme.borderRadius.md 
+                }}>
                   Assignment
                 </span>
               )}

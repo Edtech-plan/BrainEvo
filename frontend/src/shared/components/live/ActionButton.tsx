@@ -1,4 +1,6 @@
+// ActionButton.tsx
 import React from 'react';
+import { theme } from '@/shared/components/ui/theme';
 
 interface ActionButtonProps {
   label: string;
@@ -7,24 +9,26 @@ interface ActionButtonProps {
   variant?: 'primary' | 'outline';
 }
 
-function ActionButton({ 
-  label, 
-  onClick, 
-  disabled, 
-  variant = 'primary' 
-}: ActionButtonProps) {
-  const baseStyles = "w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2";
-  
-  const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md focus:ring-blue-600",
-    outline: "border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 focus:ring-slate-500"
-  };
+function ActionButton({ label, onClick, disabled, variant = 'primary' }: ActionButtonProps) {
+  const isPrimary = variant === 'primary';
 
   return (
     <button
       disabled={disabled}
       onClick={onClick}
-      className={`${baseStyles} ${variants[variant]}`}
+      style={{
+        width: '100%',
+        padding: '10px 16px',
+        borderRadius: theme.borderRadius.md,
+        fontSize: '14px',
+        fontWeight: 500,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        border: isPrimary ? 'none' : `1px solid ${theme.colors.border}`,
+        backgroundColor: isPrimary ? theme.colors.primary : 'transparent',
+        color: isPrimary ? '#fff' : theme.colors.textMain,
+        transition: 'all 0.2s ease',
+      }}
     >
       {label}
     </button>

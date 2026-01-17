@@ -1,5 +1,9 @@
+// UpcomingClasses.tsx
+import React from 'react';
 import ClassCard from "@/shared/components/live/ClassCard";
 import SectionHeader from "@/shared/components/live/SectionHeader";
+// Importing theme just in case we need it for future extensions, 
+// though ClassCard handles most styling here.
 
 function UpcomingClasses() {
   const classes = [

@@ -1,4 +1,6 @@
+// ClassCard.tsx
 import React from 'react';
+import { theme } from '@/shared/components/ui/theme';
 
 interface ClassCardProps {
   title: string;
@@ -6,43 +8,56 @@ interface ClassCardProps {
   time: string;
   status?: string;
   children?: React.ReactNode;
+  noBorder?: boolean;
 }
 
-function ClassCard({
-  title,
-  teacher,
-  time,
-  status,
-  children,
-}: ClassCardProps) {
+function ClassCard({ title, teacher, time, status, children, noBorder = false }: ClassCardProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 
-      transform-gpu transition-transform duration-200 hover:-translate-y-1 hover:border-blue-400
-      flex flex-col h-full"
+    <div style={{
+      backgroundColor: theme.colors.bgSurface,
+      borderRadius: theme.borderRadius.lg,
+      border: noBorder ? 'none' : `1px solid ${theme.colors.border}`,
+      padding: '20px',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      transition: 'transform 0.2s', // Keeping transition
+      boxShadow: theme.shadows.sm
+    }}
+    className="hover:-translate-y-1" // Tailwind for hover transform is cleaner than inline state
     >
-      <div className="flex justify-between items-start mb-3 gap-4">
-        <h3 className="font-semibold text-slate-900 text-lg leading-tight">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: theme.colors.textMain, marginRight: '16px' }}>
           {title}
         </h3>
         {status && (
-          <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+          <span style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            padding: '4px 10px',
+            borderRadius: theme.borderRadius.full,
+            backgroundColor: theme.colors.bgMain,
+            color: theme.colors.textSecondary,
+            border: `1px solid ${theme.colors.border}`,
+            whiteSpace: 'nowrap'
+          }}>
             {status}
           </span>
         )}
       </div>
 
-      <div className="space-y-1 mb-4 flex-grow">
-        <div className="flex items-center text-sm text-slate-500">
-          <span className="font-medium text-slate-700 mr-1">Instructor:</span> 
+      <div style={{ flexGrow: 1, marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ fontSize: '14px', color: theme.colors.textSecondary }}>
+          <span style={{ fontWeight: 500, color: theme.colors.textMain, marginRight: '4px' }}>Instructor:</span>
           {teacher}
         </div>
-        <div className="flex items-center text-sm text-slate-500">
-          <span className="font-medium text-slate-700 mr-1">Time:</span> 
+        <div style={{ fontSize: '14px', color: theme.colors.textSecondary }}>
+          <span style={{ fontWeight: 500, color: theme.colors.textMain, marginRight: '4px' }}>Time:</span>
           {time}
         </div>
       </div>
 
-      {children && <div className="mt-auto pt-2">{children}</div>}
+      {children && <div style={{ marginTop: 'auto' }}>{children}</div>}
     </div>
   );
 }

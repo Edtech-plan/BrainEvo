@@ -72,7 +72,7 @@ const Home: NextPage = () => {
             ) : (
               <>
                 <Link href="/login">
-                  <button className="px-5 py-2.5 rounded-full text-slate-600 text-sm font-medium hover:text-slate-900 hover:bg-slate-50 transition-colors">
+                  <button className="px-5 py-2.5 rounded-full text-slate-600 text-sm font-medium hover:text-slate-900 hover:bg-slate-200 transition-colors">
                     Log in
                   </button>
                 </Link>
@@ -107,7 +107,7 @@ const Home: NextPage = () => {
       </header>
 
       {/* --- Hero Section --- */}
-      <section className="relative pt-16 pb-24 lg:pt-32 lg:pb-40 overflow-hidden">
+      <section className="relative pt-12 pb-24 overflow-hidden">
         {/* Background Decor */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl -z-10 pointer-events-none">
           <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-3xl opacity-60" />
