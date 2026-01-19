@@ -1,42 +1,43 @@
-import { Card } from "@/shared/components/ui";
+import React from 'react';
+import { theme } from '../ui/theme';
 
-function PerformanceSnapshot() {
+export default function PerformanceSnapshot() {
   return (
-    <Card className="p-6">
-      <h2 className="text-lg font-bold text-slate-900 mb-4">
-        Performance Snapshot
-      </h2>
+    <div style={{
+      backgroundColor: theme.colors.bgSurface,
+      border: `1px solid ${theme.colors.border}`,
+      borderRadius: theme.borderRadius.lg,
+      padding: '24px',
+      boxShadow: theme.shadows.sm,
+    }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textMain, marginBottom: '24px', margin: 0 }}>Performance Snapshot</h2>
 
-      <div className="space-y-6">
-        {/* Progress Bar */}
-        <div>
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-slate-600 font-medium">On-time Submissions</span>
-            <span className="font-bold text-slate-900">90%</span>
-          </div>
-          <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-600 w-[90%] rounded-full" />
-          </div>
+      <div style={{ marginBottom: '24px', marginTop: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '8px' }}>
+          <span style={{ color: theme.colors.textSecondary, fontWeight: '500' }}>On-time Submissions</span>
+          <span style={{ color: theme.colors.textMain, fontWeight: '700' }}>90%</span>
         </div>
-
-        {/* Mini Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 bg-slate-50 rounded-xl text-center border border-slate-100">
-            <div className="text-2xl font-bold text-slate-900 mb-1">1</div>
-            <div className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
-              Missed Deadlines
-            </div>
-          </div>
-          <div className="p-4 bg-emerald-50/50 rounded-xl text-center border border-emerald-100">
-            <div className="text-2xl font-bold text-emerald-600 mb-1">Up</div>
-            <div className="text-xs text-emerald-700 uppercase tracking-wide font-semibold">
-              Attendance Trend
-            </div>
-          </div>
+        <div style={{ height: '8px', width: '100%', backgroundColor: theme.colors.bgHover, borderRadius: theme.borderRadius.full, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: '90%', backgroundColor: theme.colors.success, borderRadius: theme.borderRadius.full }} />
         </div>
       </div>
-    </Card>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{
+          backgroundColor: theme.colors.bgMain, borderRadius: theme.borderRadius.md,
+          padding: '16px', textAlign: 'center', border: `1px solid ${theme.colors.border}`
+        }}>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: theme.colors.textMain }}>1</div>
+          <div style={{ fontSize: '12px', textTransform: 'uppercase', color: theme.colors.textSecondary, fontWeight: 600, marginTop: '4px' }}>Missed Deadlines</div>
+        </div>
+        <div style={{
+          backgroundColor: theme.colors.successBg, borderRadius: theme.borderRadius.md,
+          padding: '16px', textAlign: 'center', border: '1px solid #d1fae5'
+        }}>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: '#047857' }}>Up</div>
+          <div style={{ fontSize: '12px', textTransform: 'uppercase', color: '#059669', fontWeight: 600, marginTop: '4px' }}>Attendance Trend</div>
+        </div>
+      </div>
+    </div>
   );
 }
-
-export default PerformanceSnapshot;

@@ -1,49 +1,35 @@
-// AttendanceBadge.tsx
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '../ui/theme';
 
 interface AttendanceBadgeProps {
   status: 'Present' | 'Late' | 'Absent';
 }
 
-function AttendanceBadge({ status }: AttendanceBadgeProps) {
-  const getStyle = () => {
+export default function AttendanceBadge({ status }: AttendanceBadgeProps) {
+  const getStyles = () => {
     switch (status) {
-      case 'Present':
-        return { bg: theme.colors.successBg, color: theme.colors.success, border: theme.colors.success };
-      case 'Late':
-        return { bg: theme.colors.warningBg, color: theme.colors.warning, border: theme.colors.warning };
-      case 'Absent':
-        return { bg: theme.colors.errorBg, color: theme.colors.error, border: theme.colors.error };
-      default:
-        return { bg: theme.colors.bgSurface, color: theme.colors.textMain, border: theme.colors.border };
+      case 'Present': return { bg: theme.colors.successBg, text: theme.colors.success, border: '#6ee7b7' }; // Green
+      case 'Late': return { bg: theme.colors.warningBg, text: '#d97706', border: '#fcd34d' }; // Yellow/Amber
+      case 'Absent': return { bg: theme.colors.errorBg, text: theme.colors.error, border: '#fca5a5' }; // Red
+      default: return { bg: theme.colors.bgHover, text: theme.colors.textSecondary, border: theme.colors.border };
     }
   };
 
-  const s = getStyle();
+  const style = getStyles();
 
   return (
     <span style={{
       display: 'inline-flex',
       alignItems: 'center',
-      padding: '2px 10px',
+      padding: '4px 12px',
       borderRadius: theme.borderRadius.full,
+      backgroundColor: style.bg,
+      color: style.text,
+      border: `1px solid ${style.border}`,
       fontSize: '12px',
-      fontWeight: 500,
-      backgroundColor: s.bg,
-      color: s.color,
-      border: `1px solid ${s.border}40`
+      fontWeight: 600,
     }}>
-      <span style={{
-        width: '6px',
-        height: '6px',
-        borderRadius: '50%',
-        marginRight: '6px',
-        backgroundColor: s.color
-      }} />
       {status}
     </span>
   );
 }
-
-export default AttendanceBadge;

@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import {
@@ -12,12 +10,13 @@ import {
   Video,
 } from 'lucide-react'
 
-import Overview from './Overview'
-import LiveClasses from './LiveClasses'
+
 import { useAuth } from '../../src/shared/hooks/useAuth'
 import { DashboardLayout } from '../../src/shared/components/layout'
 import type { UserRole } from '../../src/shared/types'
 import { theme } from '../../src/shared/components/ui/theme'
+import Overview from './Overview'
+import LiveClasses from './LiveClasses'
 
 type Section = 'overview' | 'live' | 'calendar' | 'projects' | 'resources' | 'messages' | 'settings'
 
@@ -41,22 +40,14 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div style={{
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         backgroundColor: theme.colors.bgMain
       }}>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
         <div style={{
-          width: '32px',
-          height: '32px',
-          border: `3px solid ${theme.colors.border}`,
-          borderTopColor: theme.colors.primary,
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }}>
-           <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-        </div>
+          width: '32px', height: '32px', border: `3px solid ${theme.colors.border}`,
+          borderTopColor: theme.colors.primary, borderRadius: '50%', animation: 'spin 1s linear infinite'
+        }} />
       </div>
     )
   }
@@ -79,6 +70,11 @@ export default function Dashboard() {
       activeSection={activeSection}
       onSectionChange={(s) => setActiveSection(s as Section)}
     >
+      {/* 
+        NOTE: Since DashboardLayout now handles the Main Scroll,
+        We pass the content directly. The content components 
+        should NOT have 'overflow' properties, just layout.
+      */}
       {activeSection === 'overview' && <Overview />}
       {activeSection === 'live' && <LiveClasses />}
       {/* Add other sections here */}

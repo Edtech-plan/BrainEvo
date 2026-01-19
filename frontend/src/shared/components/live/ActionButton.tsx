@@ -1,38 +1,37 @@
-// ActionButton.tsx
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '../ui/theme';
 
 interface ActionButtonProps {
   label: string;
   onClick?: () => void;
   disabled?: boolean;
-  variant?: 'primary' | 'outline';
+  style?: React.CSSProperties; // Added to allow width customization
 }
 
-function ActionButton({ label, onClick, disabled, variant = 'primary' }: ActionButtonProps) {
-  const isPrimary = variant === 'primary';
-
+export default function ActionButton({ label, onClick, disabled, style }: ActionButtonProps) {
   return (
     <button
-      disabled={disabled}
       onClick={onClick}
+      disabled={disabled}
       style={{
-        width: '100%',
-        padding: '10px 16px',
+        width: '100%', // Default to full width (can be overridden)
+        padding: '10px 20px',
+        backgroundColor: disabled ? theme.colors.border : theme.colors.primary,
+        color: '#fff',
         borderRadius: theme.borderRadius.md,
+        fontWeight: 600,
         fontSize: '14px',
-        fontWeight: 500,
+        border: 'none',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        border: isPrimary ? 'none' : `1px solid ${theme.colors.border}`,
-        backgroundColor: isPrimary ? theme.colors.primary : 'transparent',
-        color: isPrimary ? '#fff' : theme.colors.textMain,
-        transition: 'all 0.2s ease',
+        transition: 'background-color 0.2s, transform 0.1s',
+        opacity: disabled ? 0.7 : 1,
+        whiteSpace: 'nowrap',
+        ...style, // Allow overrides
       }}
+      onMouseEnter={(e) => { if(!disabled) e.currentTarget.style.backgroundColor = theme.colors.primaryDark; }}
+      onMouseLeave={(e) => { if(!disabled) e.currentTarget.style.backgroundColor = theme.colors.primary; }}
     >
       {label}
     </button>
   );
 }
-
-export default ActionButton;

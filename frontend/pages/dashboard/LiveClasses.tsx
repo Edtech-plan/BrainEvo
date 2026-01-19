@@ -1,31 +1,36 @@
-// LiveClasses.tsx
 import React from 'react';
-import OngoingClass from '../../src/shared/components/live/OngoingClass';
-import TodayClasses from '../../src/shared/components/live/TodayClasses';
-import UpcomingClasses from '../../src/shared/components/live/UpcomingClasses';
-import PastClasses from '../../src/shared/components/live/PastClasses';
-import { theme } from '@/shared/components/ui/theme';
-import { PageHeader } from '@/shared/components/ui';
+import { theme } from '../../src/shared/components/ui/theme';
+import OngoingClass from '@/shared/components/live/OngoingClass';
+import TodayClasses from '@/shared/components/live/TodayClasses';
+import UpcomingClasses from '@/shared/components/live/UpcomingClasses';
+import PastClasses from '@/shared/components/live/PastClasses';
 
 function LiveClasses() {
   return (
-    <div style={{ 
-      height: '100vh', 
-      overflowY: 'auto', 
-      backgroundColor: theme.colors.bgMain, // Using theme.colors.bgMain (Slate-50)
-      scrollbarWidth: 'none', 
-      msOverflowStyle: 'none'
-    }} className="[&::-webkit-scrollbar]:hidden">
-      <div className="max-w-7xl mx-auto space-y-8 pb-32">
-        <PageHeader 
-          title="Live Classes" 
-          description="Manage your schedule, join ongoing sessions, and review past lectures."
-        />
-        <OngoingClass />
-        <TodayClasses />
-        <UpcomingClasses />
-        <PastClasses />
+    <div style={{ paddingBottom: '40px' }}>
+      <div style={{ marginBottom: '32px' }}>
+         <h1 style={{ 
+            fontSize: '24px', 
+            fontWeight: 700, 
+            color: theme.colors.textMain, 
+            marginBottom: '4px',
+            margin: 0
+         }}>
+            Live Classes
+         </h1>
+         <p style={{ 
+            color: theme.colors.textSecondary, 
+            margin: 0,
+            fontSize: '14px'
+         }}>
+            Manage your schedule, join ongoing sessions, and review past lectures.
+         </p>
       </div>
+
+      <OngoingClass />
+      <TodayClasses />
+      <UpcomingClasses />
+      <PastClasses />
     </div>
   );
 }

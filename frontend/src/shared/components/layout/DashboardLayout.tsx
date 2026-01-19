@@ -20,34 +20,37 @@ export default function DashboardLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Responsive Styles:
-  // - .mobile-only: Visible on phones, Hidden on Desktop
-  // - .desktop-only: Hidden on phones, Visible on Desktop
-  // - .sidebar-desktop: The wrapper for the static sidebar
-  const responsiveStyles = `
-    .mobile-only { display: flex !important; }
-    .desktop-only { display: none !important; }
-    .sidebar-desktop { display: none !important; }
+  const css = `
+    .mobile-visible { display: flex !important; }
+    .desktop-visible { display: none !important; }
+    .sidebar-wrapper { display: none !important; }
+    
+    /* Scrollbar Hiding Class */
+    .hide-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
 
     @media (min-width: 1024px) {
-      .mobile-only { display: none !important; }
-      .desktop-only { display: flex !important; }
-      .sidebar-desktop { display: block !important; }
+      .mobile-visible { display: none !important; }
+      .desktop-visible { display: flex !important; }
+      .sidebar-wrapper { display: block !important; }
     }
   `;
 
   const styles = {
-    // 1. Root Container: LOCKED to screen height
-    layoutContainer: {
-      height: '100vh', 
+    root: {
+      height: '100vh',
       width: '100vw',
       backgroundColor: theme.colors.bgMain,
       fontFamily: theme.font,
       display: 'flex',
       flexDirection: 'column' as const,
-      overflow: 'hidden', // Prevents window scrolling
+      overflow: 'hidden',
     },
-    // 2. Header: Fixed height, stays at top
     header: {
       height: theme.sizes.headerHeight,
       backgroundColor: theme.colors.bgSurface,
@@ -56,15 +59,16 @@ export default function DashboardLayout({
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '0 24px',
-      flexShrink: 0, // Never shrinks
+      flexShrink: 0,
       zIndex: 40,
     },
-    logoText: {
+    logo: {
       fontSize: '20px',
       fontWeight: 700,
       background: `linear-gradient(to right, ${theme.colors.primaryDark}, ${theme.colors.primary})`,
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
+      textDecoration: 'none',
     },
     iconBtn: {
       padding: '8px',
@@ -77,6 +81,32 @@ export default function DashboardLayout({
       alignItems: 'center',
       justifyContent: 'center',
     },
+    body: {
+      display: 'flex',
+      flex: 1,
+      height: `calc(100vh - ${theme.sizes.headerHeight})`,
+      overflow: 'hidden',
+      position: 'relative' as const,
+    },
+    sidebarContainer: {
+      height: '100%',
+      backgroundColor: theme.colors.bgSurface,
+      borderRight: `1px solid ${theme.colors.border}`,
+      flexShrink: 0,
+    },
+    // Updated Main Style to use the class for scrollbar hiding
+    main: {
+      flex: 1,
+      height: '100%',
+      overflowY: 'auto' as const,
+      padding: '24px',
+      backgroundColor: theme.colors.bgMain,
+    },
+    contentInner: {
+      maxWidth: '1400px',
+      margin: '0 auto',
+      minHeight: '100%',
+    },
     avatar: {
       width: '32px',
       height: '32px',
@@ -88,142 +118,66 @@ export default function DashboardLayout({
       justifyContent: 'center',
       fontSize: '12px',
       fontWeight: 600,
-    },
-    // 3. Body Wrapper: Flex container for Sidebar + Main
-    bodyWrapper: {
-      display: 'flex',
-      flex: 1, // Fills remaining height
-      height: 'calc(100vh - 64px)', // Explicit height calculation
-      overflow: 'hidden',
-      position: 'relative' as const,
-    },
-    // 4. Desktop Sidebar Wrapper: Static & Fixed
-    sidebarWrapper: {
-      height: '100%',
-      flexShrink: 0,
-      backgroundColor: theme.colors.bgSurface,
-      // Sidebar component handles the border, but we ensure layout integrity here
-    },
-    // 5. Main Content: The ONLY thing that scrolls
-    main: {
-      flex: 1,
-      height: '100%',
-      overflowY: 'auto' as const, // Enable vertical scrolling
-      padding: '24px',
-      backgroundColor: theme.colors.bgMain,
-      scrollBehavior: 'smooth' as const,
-    },
-    contentInner: {
-      maxWidth: '1400px',
-      margin: '0 auto',
-      minHeight: '100%',
     }
   };
 
   return (
     <>
-      <style>{responsiveStyles}</style>
-      
-      <div style={styles.layoutContainer}>
-        
-        {/* --- Header --- */}
+      <style>{css}</style>
+      <div style={styles.root}>
         <header style={styles.header}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
               style={styles.iconBtn}
-              className="mobile-only hover:bg-slate-100"
-              aria-label={mobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
+              className="mobile-visible"
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              <Menu size={24} />
             </button>
-
-
-            {/* Desktop Sidebar Toggle */}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               style={styles.iconBtn}
-              className="desktop-only hover:bg-slate-100"
-              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="desktop-visible"
             >
-              {sidebarCollapsed ?  <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+              {sidebarCollapsed ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
             </button>
-            
-            <Link href="/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-              <span style={styles.logoText}>BrainEvo</span>
-            </Link>
+            <Link href="/dashboard" style={styles.logo}>BrainEvo</Link>
           </div>
-
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button className="hover:bg-slate-100" style={{ ...styles.iconBtn, position: 'relative' }}>
+            <button style={{ ...styles.iconBtn, position: 'relative' }}>
               <Bell size={20} />
-              <span style={{
-                position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px',
-                backgroundColor: theme.colors.error, borderRadius: '50%', border: `2px solid ${theme.colors.bgSurface}`
-              }} />
+              <span style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', backgroundColor: theme.colors.error, borderRadius: '50%', border: `2px solid ${theme.colors.bgSurface}` }} />
             </button>
             <div style={styles.avatar}>JD</div>
           </div>
         </header>
 
-        {/* --- Body (Sidebar + Content) --- */}
-        <div style={styles.bodyWrapper}>
-          
-          {/* 1. Desktop Sidebar (Static, Left Side) */}
-          <div className="sidebar-desktop" style={styles.sidebarWrapper}>
-            <Sidebar
-              navItems={navItems}
-              activeSection={activeSection}
-              onSectionChange={onSectionChange}
-              collapsed={sidebarCollapsed}
-            />
+        <div style={styles.body}>
+          <div className="sidebar-wrapper" style={styles.sidebarContainer}>
+            <Sidebar navItems={navItems} activeSection={activeSection} onSectionChange={onSectionChange} collapsed={sidebarCollapsed} />
           </div>
 
-          {/* 2. Mobile Sidebar Drawer (Overlay) */}
           {mobileMenuOpen && (
-            <div style={{ position: 'absolute', inset: 0, zIndex: 50 }} className="mobile-only">
-              {/* Backdrop */}
-              <button
-                type="button"
-                style={{ 
-                  position: 'absolute', inset: 0, width: '100%', height: '100%', 
-                  backgroundColor: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(4px)',
-                  border: 'none', cursor: 'default'
-                }}
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close mobile menu"
-              />
-              
-              {/* Drawer Content */}
-              <div style={{ 
-                position: 'absolute', top: 0, bottom: 0, left: 0, width: '280px', 
-                backgroundColor: '#fff', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-                display: 'flex', flexDirection: 'column' 
-              }}>
+            <div style={{ position: 'absolute', inset: 0, zIndex: 50 }} className="mobile-visible">
+              <button type="button" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(4px)', border: 'none', cursor: 'default' }} onClick={() => setMobileMenuOpen(false)} />
+              <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '280px', backgroundColor: '#fff', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '16px', borderBottom: `1px solid ${theme.colors.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={styles.logo}>Menu</span>
+                  <button onClick={() => setMobileMenuOpen(false)} style={styles.iconBtn}><X size={24} /></button>
+                </div>
                 <div style={{ flex: 1, overflowY: 'auto' }}>
-                  <Sidebar
-                    navItems={navItems}
-                    activeSection={activeSection}
-                    onSectionChange={(id) => {
-                      onSectionChange(id);
-                      setMobileMenuOpen(false);
-                    }}
-                    collapsed={false}
-                    isMobile={true}
-                  />
+                  <Sidebar navItems={navItems} activeSection={activeSection} onSectionChange={(id) => { onSectionChange(id); setMobileMenuOpen(false); }} collapsed={false} isMobile={true} />
                 </div>
               </div>
             </div>
           )}
 
-          {/* 3. Main Scrollable Content */}
-          <main style={styles.main}>
+          {/* Main Content with Hide Scrollbar Class */}
+          <main style={styles.main} className="hide-scrollbar">
             <div style={styles.contentInner}>
               {children}
             </div>
           </main>
-
         </div>
       </div>
     </>

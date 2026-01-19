@@ -10,6 +10,7 @@ export default function ClassSnapshot() {
     height: '100%',
     display: 'flex',
     flexDirection: 'column' as const,
+    boxShadow: theme.shadows.sm,
   };
 
   const rowStyle = {
@@ -22,17 +23,17 @@ export default function ClassSnapshot() {
 
   return (
     <div style={cardStyle}>
-      <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textMain, marginBottom: '16px' }}>Current Batch</h2>
-      <div style={{ flexGrow: 1 }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textMain, marginBottom: '16px', margin: 0 }}>Current Batch</h2>
+      <div style={{ flexGrow: 1, marginTop: '16px' }}>
         <div style={rowStyle}>
           <span style={{ color: theme.colors.textSecondary }}>Batch</span>
-          <span style={{ fontWeight: 600 }}>Batch A</span>
+          <span style={{ fontWeight: 600, color: theme.colors.textMain }}>Batch A</span>
         </div>
         <div style={rowStyle}>
           <span style={{ color: theme.colors.textSecondary }}>Instructor</span>
-          <span style={{ fontWeight: 600 }}>John Doe</span>
+          <span style={{ fontWeight: 600, color: theme.colors.textMain }}>John Doe</span>
         </div>
-        <div style={rowStyle}>
+        <div style={{ ...rowStyle, borderBottom: 'none' }}>
           <span style={{ color: theme.colors.textSecondary }}>Next Class</span>
           <span style={{ color: theme.colors.primary, fontWeight: 600 }}>Tomorrow, 6:00 PM</span>
         </div>
