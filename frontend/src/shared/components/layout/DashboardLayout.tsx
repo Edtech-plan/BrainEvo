@@ -169,6 +169,7 @@ export default function DashboardLayout({
                   <Sidebar navItems={navItems} activeSection={activeSection} onSectionChange={(id) => { onSectionChange(id); setMobileMenuOpen(false); }} collapsed={false} isMobile={true} />
                 </div>
               </div>
+
             </div>
           )}
 
