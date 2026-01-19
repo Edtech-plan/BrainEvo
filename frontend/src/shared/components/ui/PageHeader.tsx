@@ -1,4 +1,6 @@
+// PageHeader.tsx
 import React from 'react';
+import { theme } from '@/shared/components/ui/theme';
 
 interface PageHeaderProps {
   title: string;
@@ -6,21 +8,27 @@ interface PageHeaderProps {
   className?: string;
 }
 
-export default function PageHeader({
-  title,
-  description,
-  className = '',
-}: PageHeaderProps) {
+function PageHeader({ title, description, className = '' }: PageHeaderProps) {
   return (
-    <div className={`mb-8 ${className}`}>
-      <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+    <div className={className} style={{ marginBottom: '32px' }}>
+      <h1 style={{
+        fontSize: '24px',
+        fontWeight: 700,
+        color: theme.colors.textMain,
+        marginBottom: '8px'
+      }}>
         {title}
       </h1>
       {description && (
-        <p className="mt-2 text-slate-500 text-base md:text-lg max-w-2xl">
+        <p style={{
+          fontSize: '16px',
+          color: theme.colors.textSecondary
+        }}>
           {description}
         </p>
       )}
     </div>
   );
 }
+
+export default PageHeader;

@@ -1,5 +1,4 @@
 import React from 'react';
-import { classNames } from '../../lib/utils';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,7 +8,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input: React.FC<InputProps> = ({
   label,
   error,
-  className,
+  className = '',
   id,
   ...props
 }) => {
@@ -18,24 +17,20 @@ export const Input: React.FC<InputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor={inputId} className="block text-sm font-semibold text-slate-700 mb-2">
           {label}
         </label>
       )}
       <input
         id={inputId}
-        className={classNames(
-          'w-full px-4 py-3 border border-gray-300 rounded-lg',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-          'transition-all duration-200',
-          error && 'border-red-500 focus:ring-red-500',
-          className
-        )}
+        className={`w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 
+        focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm
+        ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : ''} ${className}`}
         {...props}
       />
-      {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+        <span className="w-1 h-1 rounded-full bg-red-600"/> {error}
+      </p>}
     </div>
   );
 };

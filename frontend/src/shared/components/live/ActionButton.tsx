@@ -1,34 +1,37 @@
 import React from 'react';
+import { theme } from '../ui/theme';
 
 interface ActionButtonProps {
   label: string;
   onClick?: () => void;
   disabled?: boolean;
-  variant?: 'primary' | 'outline';
+  style?: React.CSSProperties; // Added to allow width customization
 }
 
-function ActionButton({ 
-  label, 
-  onClick, 
-  disabled, 
-  variant = 'primary' 
-}: ActionButtonProps) {
-  const baseStyles = "w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2";
-  
-  const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md focus:ring-blue-600",
-    outline: "border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 focus:ring-slate-500"
-  };
-
+export default function ActionButton({ label, onClick, disabled, style }: ActionButtonProps) {
   return (
     <button
-      disabled={disabled}
       onClick={onClick}
-      className={`${baseStyles} ${variants[variant]}`}
+      disabled={disabled}
+      style={{
+        width: '100%', // Default to full width (can be overridden)
+        padding: '10px 20px',
+        backgroundColor: disabled ? theme.colors.border : theme.colors.primary,
+        color: '#fff',
+        borderRadius: theme.borderRadius.md,
+        fontWeight: 600,
+        fontSize: '14px',
+        border: 'none',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'background-color 0.2s, transform 0.1s',
+        opacity: disabled ? 0.7 : 1,
+        whiteSpace: 'nowrap',
+        ...style, // Allow overrides
+      }}
+      onMouseEnter={(e) => { if(!disabled) e.currentTarget.style.backgroundColor = theme.colors.primaryDark; }}
+      onMouseLeave={(e) => { if(!disabled) e.currentTarget.style.backgroundColor = theme.colors.primary; }}
     >
       {label}
     </button>
   );
 }
-
-export default ActionButton;

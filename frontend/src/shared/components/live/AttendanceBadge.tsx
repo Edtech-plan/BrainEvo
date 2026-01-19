@@ -1,27 +1,35 @@
 import React from 'react';
+import { theme } from '../ui/theme';
 
 interface AttendanceBadgeProps {
   status: 'Present' | 'Late' | 'Absent';
 }
 
-function AttendanceBadge({ status }: AttendanceBadgeProps) {
-  const styles = {
-    Present: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    Late: 'bg-amber-50 text-amber-700 border-amber-200',
-    Absent: 'bg-rose-50 text-rose-700 border-rose-200',
+export default function AttendanceBadge({ status }: AttendanceBadgeProps) {
+  const getStyles = () => {
+    switch (status) {
+      case 'Present': return { bg: theme.colors.successBg, text: theme.colors.success, border: '#6ee7b7' }; // Green
+      case 'Late': return { bg: theme.colors.warningBg, text: '#d97706', border: '#fcd34d' }; // Yellow/Amber
+      case 'Absent': return { bg: theme.colors.errorBg, text: theme.colors.error, border: '#fca5a5' }; // Red
+      default: return { bg: theme.colors.bgHover, text: theme.colors.textSecondary, border: theme.colors.border };
+    }
   };
 
+  const style = getStyles();
+
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles[status]}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 
-        ${status === 'Present' ? 'bg-emerald-500' : 
-          status === 'Late' ? 'bg-amber-500' : 'bg-rose-500'}`} 
-      />
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '4px 12px',
+      borderRadius: theme.borderRadius.full,
+      backgroundColor: style.bg,
+      color: style.text,
+      border: `1px solid ${style.border}`,
+      fontSize: '12px',
+      fontWeight: 600,
+    }}>
       {status}
     </span>
   );
 }
-
-export default AttendanceBadge;

@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import {
@@ -12,72 +10,51 @@ import {
   Video,
 } from 'lucide-react'
 
-import Overview from './components/Overview'
+
 import { useAuth } from '../../src/shared/hooks/useAuth'
 import { DashboardLayout } from '../../src/shared/components/layout'
 import type { UserRole } from '../../src/shared/types'
-import LiveClasses from '../live/LiveClasses'
+import { theme } from '../../src/shared/components/ui/theme'
+import Overview from './Overview'
+import LiveClasses from './LiveClasses'
 
-type Section =
-  | 'overview'
-  | 'live'
-  | 'calendar'
-  | 'projects'
-  | 'resources'
-  | 'messages'
-  | 'settings'
-
-interface NavItem {
-  id: Section
-  label: string
-  icon: React.ReactNode
-}
+type Section = 'overview' | 'live' | 'calendar' | 'projects' | 'resources' | 'messages' | 'settings'
 
 export default function Dashboard() {
   const router = useRouter()
   const { user, isAuthenticated, loading } = useAuth()
-
   const [activeSection, setActiveSection] = useState<Section>('overview')
 
-  /* ---------------- AUTHENTICATION ---------------- */
-
-  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/login')
-    }
+    if (!loading && !isAuthenticated) router.push('/login')
   }, [loading, isAuthenticated, router])
 
-  // Role-based redirect
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
       const role = user.role as UserRole
-
-      if (role === 'teacher') {
-        router.push('/teacher/dashboard')
-      } else if (role === 'organization_admin') {
-        router.push('/admin/dashboard')
-      }
+      if (role === 'teacher') router.push('/teacher/dashboard')
+      else if (role === 'organization_admin') router.push('/admin/dashboard')
     }
   }, [loading, isAuthenticated, user, router])
 
-  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-gray-600 text-lg">Loading...</div>
+      <div style={{
+        height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: theme.colors.bgMain
+      }}>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        <div style={{
+          width: '32px', height: '32px', border: `3px solid ${theme.colors.border}`,
+          borderTopColor: theme.colors.primary, borderRadius: '50%', animation: 'spin 1s linear infinite'
+        }} />
       </div>
     )
   }
 
-  // Prevent render during redirect
-  if (!isAuthenticated) {
-    return null
-  }
+  if (!isAuthenticated) return null
 
-  /* ---------------- UI ---------------- */
-
-  const navItems: NavItem[] = [
+  const navItems = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
     { id: 'live', label: 'Live Classes', icon: <Video size={20} /> },
     { id: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
@@ -87,24 +64,20 @@ export default function Dashboard() {
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
   ]
 
-  const renderSection = () => {
-    switch (activeSection) {
-      case 'overview':
-        return <Overview />
-      case 'live':
-        return <LiveClasses />
-      default:
-        return <Overview />
-    }
-  }
-
   return (
     <DashboardLayout
       navItems={navItems}
       activeSection={activeSection}
-      onSectionChange={(section) => setActiveSection(section as Section)}
+      onSectionChange={(s) => setActiveSection(s as Section)}
     >
-      {renderSection()}
+      {/* 
+        NOTE: Since DashboardLayout now handles the Main Scroll,
+        We pass the content directly. The content components 
+        should NOT have 'overflow' properties, just layout.
+      */}
+      {activeSection === 'overview' && <Overview />}
+      {activeSection === 'live' && <LiveClasses />}
+      {/* Add other sections here */}
     </DashboardLayout>
   )
 }
