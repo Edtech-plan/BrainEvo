@@ -23,7 +23,22 @@ exports.getLiveClass = async (req, res, next) => {
 
 exports.createLiveClass = async (req, res, next) => {
   try {
-    const liveClass = await liveClassService.create(req.body);
+    // Set instructor to current user if not provided
+    const liveClassData = {
+      ...req.body,
+      instructor: req.body.instructor || req.user.id,
+      description: req.body.description || req.body.title, // Use title as description if not provided
+      duration: req.body.duration || 60, // Default 60 minutes
+    };
+
+    // For learners, make course optional (personal events)
+    // For teachers/admins, course is required
+    if (req.user.role === 'learner' && !liveClassData.course) {
+      // Allow learners to create events without a course
+      liveClassData.course = null;
+    }
+
+    const liveClass = await liveClassService.create(liveClassData);
     res.status(201).json({ success: true, data: liveClass });
   } catch (error) {
     next(error);

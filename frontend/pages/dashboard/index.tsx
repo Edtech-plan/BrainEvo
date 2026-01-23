@@ -2,23 +2,21 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import {
   LayoutDashboard,
-  Calendar,
   FolderKanban,
   Library,
   Bell,
   Settings,
+  Calendar,
   Video,
 } from 'lucide-react'
-
 
 import { useAuth } from '../../src/shared/hooks/useAuth'
 import { DashboardLayout } from '../../src/shared/components/layout'
 import type { UserRole } from '../../src/shared/types'
 import { theme } from '../../src/shared/components/ui/theme'
-import Overview from './Overview'
-import LiveClasses from './LiveClasses'
+import { Overview } from '@/features/dashboard'
 
-type Section = 'overview' | 'live' | 'calendar' | 'projects' | 'resources' | 'messages' | 'settings'
+type Section = 'overview' | 'projects' | 'resources' | 'messages' | 'settings'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -54,9 +52,21 @@ export default function Dashboard() {
 
   if (!isAuthenticated) return null
 
+  const handleNavigation = (section: string) => {
+    if (section === 'calendar') {
+      router.push('/calendar');
+      return;
+    }
+    if (section === 'live-classes') {
+      router.push('/live-classes');
+      return;
+    }
+    setActiveSection(section as Section);
+  };
+
   const navItems = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={20} /> },
-    { id: 'live', label: 'Live Classes', icon: <Video size={20} /> },
+    { id: 'live-classes', label: 'Live Classes', icon: <Video size={20} /> },
     { id: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
     { id: 'projects', label: 'Assignments', icon: <FolderKanban size={20} /> },
     { id: 'resources', label: 'Resources', icon: <Library size={20} /> },
@@ -68,15 +78,14 @@ export default function Dashboard() {
     <DashboardLayout
       navItems={navItems}
       activeSection={activeSection}
-      onSectionChange={(s) => setActiveSection(s as Section)}
+      onSectionChange={handleNavigation}
     >
-      {/* 
+      {/*
         NOTE: Since DashboardLayout now handles the Main Scroll,
-        We pass the content directly. The content components 
+        We pass the content directly. The content components
         should NOT have 'overflow' properties, just layout.
       */}
       {activeSection === 'overview' && <Overview />}
-      {activeSection === 'live' && <LiveClasses />}
       {/* Add other sections here */}
     </DashboardLayout>
   )
