@@ -1,12 +1,12 @@
-import AttentionAlerts from '@/shared/components/overview/AttentionAlerts';
-import ClassSnapshot from '@/shared/components/overview/ClassSnapshot';
-import OverviewHeader from '@/shared/components/overview/OverviewHeader';
-import OverviewStats from '@/shared/components/overview/OverviewStats';
-import PerformanceSnapshot from '@/shared/components/overview/PerformanceSnapshot';
-import UpcomingSchedule from '@/shared/components/overview/UpcomingSchedule';
 import React from 'react';
+import AttentionAlerts from './AttentionAlerts';
+import ClassSnapshot from './ClassSnapshot';
+import OverviewHeader from './OverviewHeader';
+import OverviewStats from './OverviewStats';
+import PerformanceSnapshot from './PerformanceSnapshot';
+import UpcomingSchedule from './UpcomingSchedule';
 
-function Overview() {
+export default function Overview() {
   const css = `
     .grid-main {
       display: grid;
@@ -19,7 +19,7 @@ function Overview() {
       grid-template-columns: 1fr;
       gap: 24px;
     }
-    
+
     @media (min-width: 768px) {
       .grid-sub { grid-template-columns: 1fr 1fr; }
     }
@@ -37,7 +37,7 @@ function Overview() {
     <div style={{ paddingBottom: '40px' }}>
       <style>{css}</style>
       <OverviewHeader />
-      
+
       <div style={{ marginTop: '24px' }}>
         <OverviewStats />
       </div>
@@ -57,4 +57,3 @@ function Overview() {
     </div>
   );
 }
-export default Overview;

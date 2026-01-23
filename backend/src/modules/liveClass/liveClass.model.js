@@ -8,12 +8,12 @@ const liveClassSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: true,
+    required: false, // Made optional
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course',
-    required: true,
+    required: false, // Made optional for personal events
   },
   instructor: {
     type: mongoose.Schema.Types.ObjectId,

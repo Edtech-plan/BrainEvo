@@ -1,0 +1,10 @@
+# Note: This is for reference only
+# Netlify Functions are not recommended for full Express APIs
+# Deploy backend separately on Railway, Render, or similar service
+
+[build]
+  command = "echo 'Backend should be deployed separately'"
+  publish = "."
+
+# If you must use Netlify Functions, you would need to convert
+# your Express routes to serverless functions (not recommended)
