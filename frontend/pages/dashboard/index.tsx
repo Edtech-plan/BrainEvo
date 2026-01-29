@@ -61,6 +61,10 @@ export default function Dashboard() {
       router.push('/live-classes');
       return;
     }
+    if (section === 'projects') {
+      router.push('/assignment');
+      return;
+    }
     setActiveSection(section as Section);
   };
 

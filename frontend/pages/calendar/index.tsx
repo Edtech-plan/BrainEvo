@@ -44,6 +44,10 @@ export default function Calendar() {
       router.push('/dashboard');
       return;
     }
+    if (section === 'projects') {
+      router.push('/assignment');
+      return;
+    }
     // For other sections, navigate to dashboard with that section
     router.push(`/dashboard?section=${section}`);
   };
