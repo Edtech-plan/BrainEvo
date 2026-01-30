@@ -12,10 +12,10 @@ const validate = require('../../utils/validate');
 
 const router = express.Router();
 
+router.use(auth);
+
 router.get('/', getAssignments);
 router.get('/:id', getAssignment);
-
-router.use(auth);
 
 router.post(
   '/',
