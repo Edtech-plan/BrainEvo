@@ -8,8 +8,8 @@ const routes = require('./routes');
 const errorHandler = require('./filters/http-exception.filter');
 
 // Connect to database (for non-serverless environments)
-// In Vercel serverless, connection is handled per-request via middleware
-if (process.env.VERCEL !== '1') {
+// In Vercel/Netlify serverless, connection is handled per-request via middleware
+if (process.env.VERCEL !== '1' && process.env.NETLIFY !== '1') {
   connectDB().catch((err) => {
     console.error('Database connection error:', err);
     process.exit(1);
@@ -64,9 +64,9 @@ app.use('/api', routes);
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-// Start server only if not running on Vercel
-// Vercel handles the server automatically
-if (process.env.VERCEL !== '1') {
+// Start server only if not running on Vercel or Netlify
+// Vercel/Netlify handle the server via serverless functions
+if (process.env.VERCEL !== '1' && process.env.NETLIFY !== '1') {
   const PORT = env.PORT || 5001;
   app.listen(PORT, () => {
     console.log(`Server running in ${env.NODE_ENV} mode on port ${PORT}`);
