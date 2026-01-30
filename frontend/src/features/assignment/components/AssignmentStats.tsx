@@ -4,7 +4,7 @@ import { Assignment } from '@/shared/types/assignment.types'; // Fixed Import Pa
 import { Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 // Fix: Exported Interface & Added loading prop
-export interface AssignmentStatsProps {
+interface AssignmentStatsProps {
   assignments: Assignment[];
   loading?: boolean;
 }

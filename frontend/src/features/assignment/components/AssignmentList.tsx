@@ -4,7 +4,7 @@ import { Assignment } from '@/shared/types/assignment.types'; // Fixed Import Pa
 import AssignmentCard from './AssignmentCard';
 
 // Fix: Exported Interface as requested
-export interface AssignmentListProps {
+interface AssignmentListProps {
   assignments: Assignment[];
   loading: boolean;
   onSelect: (a: Assignment) => void;
