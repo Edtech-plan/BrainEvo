@@ -2,7 +2,7 @@
  * Error Handling Filter
  * Handles all errors and sends appropriate response
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
   let error = { ...err };
   error.message = err.message;
 

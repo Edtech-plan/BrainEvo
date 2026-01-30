@@ -1,7 +1,7 @@
 import React from 'react';
 import { theme } from '@/shared/components/ui/theme';
 import { Assignment } from '../../../shared/types/assignment.types';
-import { Calendar, ChevronRight, User } from 'lucide-react';
+import { Calendar, ChevronRight } from 'lucide-react';
 
 interface Props {
   assignment: Assignment;
@@ -11,7 +11,6 @@ interface Props {
 export default function AssignmentCard({ assignment, onClick }: Props) {
   const isOverdue = assignment.status === 'OVERDUE';
   const isGraded = assignment.status === 'GRADED';
-  const isPending = assignment.status === 'PENDING';
 
   // Status Styling Logic
   const getStatusBadge = () => {
@@ -24,7 +23,7 @@ export default function AssignmentCard({ assignment, onClick }: Props) {
   const badge = getStatusBadge();
 
   return (
-    <button 
+    <button
       onClick={onClick}
       style={{
         backgroundColor: theme.colors.bgSurface,
@@ -53,16 +52,16 @@ export default function AssignmentCard({ assignment, onClick }: Props) {
     >
       {/* Top Meta Row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-        <span style={{ 
-          fontSize: '11px', fontWeight: 700, color: theme.colors.textSecondary, 
+        <span style={{
+          fontSize: '11px', fontWeight: 700, color: theme.colors.textSecondary,
           textTransform: 'uppercase', letterSpacing: '0.05em',
           backgroundColor: theme.colors.bgMain, padding: '6px 10px', borderRadius: '6px'
         }}>
           {assignment.subject}
         </span>
-        
-        <div style={{ 
-          padding: '4px 10px', borderRadius: '99px', 
+
+        <div style={{
+          padding: '4px 10px', borderRadius: '99px',
           backgroundColor: badge.bg, color: badge.color, border: `1px solid ${badge.border}`,
           fontSize: '11px', fontWeight: 700, textTransform: 'uppercase'
         }}>
@@ -78,7 +77,7 @@ export default function AssignmentCard({ assignment, onClick }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isOverdue ? theme.colors.error : theme.colors.textSecondary, fontSize: '13px', fontWeight: 500 }}>
           <Calendar size={14} />
           <span>
-            {isGraded ? 'Completed on ' : 'Due '} 
+            {isGraded ? 'Completed on ' : 'Due '}
             {new Date(assignment.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
         </div>
@@ -86,12 +85,12 @@ export default function AssignmentCard({ assignment, onClick }: Props) {
 
       {/* Footer / Instructor & Score */}
       <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: `1px solid ${theme.colors.bgMain}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        
+
         {/* Instructor Info */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ 
-            width: '28px', height: '28px', borderRadius: '50%', backgroundColor: theme.colors.primaryLight, 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: theme.colors.primary 
+          <div style={{
+            width: '28px', height: '28px', borderRadius: '50%', backgroundColor: theme.colors.primaryLight,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: theme.colors.primary
           }}>
             {assignment.instructorName.charAt(0)}
           </div>
@@ -106,8 +105,8 @@ export default function AssignmentCard({ assignment, onClick }: Props) {
              {assignment.mySubmission?.grade}<span style={{ fontSize: '12px', color: theme.colors.textSecondary, fontWeight: 500 }}>/{assignment.pointsTotal}</span>
            </div>
         ) : (
-           <div style={{ 
-             width: '32px', height: '32px', borderRadius: '50%', 
+           <div style={{
+             width: '32px', height: '32px', borderRadius: '50%',
              backgroundColor: theme.colors.bgHover, display: 'flex', alignItems: 'center', justifyContent: 'center',
              color: theme.colors.textMain
            }}>

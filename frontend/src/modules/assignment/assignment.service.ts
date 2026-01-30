@@ -31,4 +31,5 @@ class AssignmentService {
   }
 }
 
-export default new AssignmentService();
+const assignmentService = new AssignmentService();
+export default assignmentService;
