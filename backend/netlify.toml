@@ -1,17 +1,17 @@
 # Backend API deployed as Netlify Functions (serverless)
-# In Netlify: set Base directory = "backend" for this site
+# In Netlify UI: Base directory = "backend" (so this file is used)
 
 [build]
   base = "."
   command = "npm install"
-  publish = "."
+  publish = "public"
 
 # Functions: Express app runs as a single serverless function
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-# Redirect all API traffic to the serverless function
+# All traffic to the serverless function (Express API)
 [[redirects]]
   from = "/*"
   to = "/.netlify/functions/server"

@@ -58,3 +58,9 @@ logs
 *.md
 !README.md
 !readme.md
+DEPLOYMENT_SUMMARY.txt
+NETLIFY_SETUP.txt
+RAILWAY_SETUP.txt
+backend/.railwayignore
+backend/public/
+backend/railway.json
