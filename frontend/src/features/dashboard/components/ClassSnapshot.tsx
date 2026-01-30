@@ -3,10 +3,10 @@ import { theme } from '@/shared/components/ui/theme';
 import { useLiveClasses } from '@/features/live-classes';
 
 export default function ClassSnapshot() {
-  const { upcomingClasses } = useLiveClasses(); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const { upcomingClasses, loading } = useLiveClasses();
 
   const nextClass = useMemo(() => {
-    if (upcomingClasses.length === 0) return null;
+    if (!upcomingClasses || upcomingClasses.length === 0) return null;
     return upcomingClasses[0];
   }, [upcomingClasses]);
 
@@ -44,7 +44,9 @@ export default function ClassSnapshot() {
 
   return (
     <div style={cardStyle}>
-      <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textMain, marginBottom: '16px', margin: 0 }}>Current Batch</h2>
+      <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textMain, marginBottom: '16px', margin: 0 }}>
+        Current Batch
+      </h2>
       <div style={{ flexGrow: 1, marginTop: '16px' }}>
         {nextClass ? (
           <>
@@ -87,7 +89,9 @@ export default function ClassSnapshot() {
         fontWeight: 600,
         color: theme.colors.textSecondary,
         cursor: 'pointer'
-      }}>View Course Details</button>
+      }}>
+        View Course Details
+      </button>
     </div>
   );
 }

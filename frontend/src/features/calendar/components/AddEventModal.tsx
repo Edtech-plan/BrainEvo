@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Calendar, Clock, Link as LinkIcon, User, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Calendar, Clock, Link as LinkIcon, AlertCircle, Loader2, User as UserIcon } from 'lucide-react';
 import { theme } from '@/shared/components/ui/theme';
 import liveClassService from '@/features/live-classes/services/liveClass.service';
 import userService from '@/modules/user/user.service';
 import type { User } from '@/shared/types';
+import { useLiveClasses } from '@/features/live-classes';
 
 interface AddEventModalProps {
   isOpen: boolean;
@@ -472,7 +473,7 @@ export default function AddEventModal({ isOpen, onClose, selectedDate, selectedT
             }}>
               Student <span style={{ fontSize: '12px', fontWeight: 400, color: theme.colors.textSecondary }}>(Optional)</span>
             </label>
-            <InputWrapper icon={<User size={18} />}>
+            <InputWrapper icon={<UserIcon size={18} />}>
               <select
                 id="event-student-select"
                 aria-label="Select student"
