@@ -12,10 +12,10 @@ import {
 import { useAuth } from '../../src/shared/hooks/useAuth';
 import { DashboardLayout } from '../../src/shared/components/layout';
 import { theme } from '../../src/shared/components/ui/theme';
-// Import the main layout component directly from features
-
 import type { UserRole } from '../../src/shared/types';
-import AssignmentLayout from '@/features/assignment/components/AssignmentLayout';
+
+// FIX: Import from the feature index, not deep component path
+import { AssignmentLayout } from '@/features/assignment'; 
 
 export default function AssignmentsPage() {
   const router = useRouter();

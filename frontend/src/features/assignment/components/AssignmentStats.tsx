@@ -1,13 +1,35 @@
 import React from 'react';
 import { theme } from '@/shared/components/ui/theme';
-import { Assignment } from '../../../shared/types/assignment.types';
+import { Assignment } from '@/shared/types/assignment.types'; // Fixed Import Path
 import { Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-interface Props {
+// Fix: Exported Interface & Added loading prop
+export interface AssignmentStatsProps {
   assignments: Assignment[];
+  loading?: boolean;
 }
 
-export default function AssignmentStats({ assignments }: Props) {
+export default function AssignmentStats({ assignments, loading }: AssignmentStatsProps) {
+  // Fix: Render Skeleton if loading
+  if (loading) {
+    return (
+      <div style={{ marginBottom: '32px' }}>
+        {/* Simple Grid Skeleton that fits both mobile/desktop layout spaces reasonably well */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} style={{
+              height: '100px',
+              backgroundColor: theme.colors.bgSurface,
+              borderRadius: theme.borderRadius.lg,
+              border: `1px solid ${theme.colors.border}`,
+              opacity: 0.5
+            }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const pending = assignments.filter(a => a.status === 'PENDING').length;
   const overdue = assignments.filter(a => a.status === 'OVERDUE').length;
   const completed = assignments.filter(a => a.status === 'GRADED' || a.status === 'SUBMITTED').length;
@@ -20,13 +42,12 @@ export default function AssignmentStats({ assignments }: Props) {
 
   const css = `
     /* --- MOBILE VIEW (Default) --- */
-    /* One single container with internal dividers */
     .stats-container {
       display: flex;
       background-color: ${theme.colors.bgSurface};
       border: 1px solid ${theme.colors.border};
       border-radius: ${theme.borderRadius.lg};
-      overflow: hidden; /* For border radius */
+      overflow: hidden;
     }
 
     .stat-card {
@@ -44,25 +65,19 @@ export default function AssignmentStats({ assignments }: Props) {
       border-right: none;
     }
 
-    /* Hide the big icon background on mobile to save space */
-    .icon-wrapper {
-      display: none;
-    }
+    .icon-wrapper { display: none; }
     
-    /* Show a small icon inline on mobile */
     .mobile-icon {
       display: block;
       margin-bottom: 6px;
     }
 
     /* --- DESKTOP VIEW (Min-width: 768px) --- */
-    /* Switch back to 3 separate Grid Cards */
     @media (min-width: 768px) {
       .stats-container {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
-        /* Reset container styles to be invisible */
         background-color: transparent;
         border: none;
         border-radius: 0;
@@ -70,14 +85,12 @@ export default function AssignmentStats({ assignments }: Props) {
       }
 
       .stat-card {
-        /* Restore Card Look */
         background-color: ${theme.colors.bgSurface};
         border: 1px solid ${theme.colors.border};
         border-radius: ${theme.borderRadius.lg};
         padding: 20px;
-        
         display: flex;
-        flex-direction: row; /* Icon on right */
+        flex-direction: row;
         align-items: center;
         justify-content: space-between;
         text-align: left;
@@ -85,10 +98,9 @@ export default function AssignmentStats({ assignments }: Props) {
       }
 
       .stat-card:last-child {
-        border-right: 1px solid ${theme.colors.border}; /* Restore border */
+        border-right: 1px solid ${theme.colors.border};
       }
 
-      /* Show the desktop icon wrapper */
       .icon-wrapper {
         display: flex;
         width: 48px;
@@ -98,10 +110,7 @@ export default function AssignmentStats({ assignments }: Props) {
         justify-content: center;
       }
 
-      /* Hide the mobile small icon */
-      .mobile-icon {
-        display: none;
-      }
+      .mobile-icon { display: none; }
     }
   `;
 
@@ -111,43 +120,18 @@ export default function AssignmentStats({ assignments }: Props) {
       <div className="stats-container">
         {statCards.map((stat, i) => (
           <div key={i} className="stat-card">
-            
-            {/* Mobile Only Icon (Small & Centered) */}
-            <div className="mobile-icon">
-               {stat.icon}
-            </div>
-
+            <div className="mobile-icon">{stat.icon}</div>
             <div>
-              <p style={{ 
-                margin: 0, 
-                fontSize: '11px', 
-                fontWeight: 700, 
-                color: theme.colors.textSecondary, 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.05em',
-                whiteSpace: 'nowrap'
-              }}>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: theme.colors.textSecondary, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                 {stat.label}
               </p>
-              <p style={{ 
-                margin: '4px 0 0 0', 
-                fontSize: '24px', 
-                fontWeight: 800, 
-                color: theme.colors.textMain,
-                lineHeight: 1
-              }}>
+              <p style={{ margin: '4px 0 0 0', fontSize: '24px', fontWeight: 800, color: theme.colors.textMain, lineHeight: 1 }}>
                 {stat.value}
               </p>
             </div>
-
-            {/* Desktop Only Icon (Big & Colored Box) */}
-            <div className="icon-wrapper" style={{
-              backgroundColor: stat.bg,
-              border: `1px solid ${stat.border}`
-            }}>
+            <div className="icon-wrapper" style={{ backgroundColor: stat.bg, border: `1px solid ${stat.border}` }}>
               {stat.icon}
             </div>
-
           </div>
         ))}
       </div>

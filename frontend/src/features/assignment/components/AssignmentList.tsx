@@ -1,17 +1,16 @@
 import React from 'react';
 import { theme } from '@/shared/components/ui/theme';
-import { Assignment } from '../../../shared/types/assignment.types';
+import { Assignment } from '@/shared/types/assignment.types'; // Fixed Import Path
 import AssignmentCard from './AssignmentCard';
 
-interface Props {
+// Fix: Exported Interface as requested
+export interface AssignmentListProps {
   assignments: Assignment[];
   loading: boolean;
   onSelect: (a: Assignment) => void;
 }
 
-export default function AssignmentList({ assignments, loading, onSelect }: Props) {
-  // Responsive Fix: minmax(340px) -> minmax(290px)
-  // This ensures that on a mobile screen (approx 360px-390px wide), the card fits without causing horizontal scroll.
+export default function AssignmentList({ assignments, loading, onSelect }: AssignmentListProps) {
   const gridStyle = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', 

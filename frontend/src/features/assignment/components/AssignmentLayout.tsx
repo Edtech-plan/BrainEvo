@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { theme } from '@/shared/components/ui/theme';
 import { useAssignments } from '../hooks/useAssignments';
-import { Assignment } from '../../../shared/types/assignment.types';
-import AssignmentList from './AssignmentList';
-import AssignmentDetail from './AssignmentDetail';
-import AssignmentStats from './AssignmentStats';
+import { Assignment } from '@/shared/types/assignment.types'; // Fixed Import Path
+import { AlertCircle } from 'lucide-react';
+
+// Fix: Using Barrel Imports
+import { 
+  AssignmentList, 
+  AssignmentDetail, 
+  AssignmentStats 
+} from './index';
 
 export default function AssignmentLayout() {
-  const { assignments, loading, filter, setFilter, refresh } = useAssignments();
+  // Fix: Destructure error
+  const { assignments, loading, filter, setFilter, refresh, error } = useAssignments();
   const [selected, setSelected] = useState<Assignment | null>(null);
 
   const tabs: { id: typeof filter; label: string }[] = [
@@ -22,7 +28,6 @@ export default function AssignmentLayout() {
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-      {/* Header Section - Flex wrap allows title and description to adjust */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '26px', fontWeight: 800, color: theme.colors.textMain, margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
           Assignments
@@ -32,18 +37,27 @@ export default function AssignmentLayout() {
         </p>
       </div>
 
-      {/* Stats Summary */}
-      {!loading && <AssignmentStats assignments={assignments} />}
+      {/* Fix: Error Display UI */}
+      {error && (
+        <div style={{ 
+          padding: '12px 16px', marginBottom: '20px', borderRadius: theme.borderRadius.md, 
+          backgroundColor: theme.colors.errorBg, border: `1px solid ${theme.colors.error}30`,
+          display: 'flex', alignItems: 'center', gap: '8px', color: theme.colors.error
+        }}>
+          <AlertCircle size={18} />
+          <span style={{ fontSize: '14px', fontWeight: 600 }}>{error}</span>
+        </div>
+      )}
 
-      {/* Filter Tabs - Responsive Scroll Container */}
+      {/* Fix: Removed !loading check, passed loading prop to component */}
+      <AssignmentStats assignments={assignments} loading={loading} />
+
       <div style={{ 
         borderBottom: `1px solid ${theme.colors.border}`, 
         marginBottom: '24px',
-        // Responsive Fix: Allow horizontal scroll on small screens
         display: 'flex',
         overflowX: 'auto',
         whiteSpace: 'nowrap',
-        // Hide scrollbar for cleaner look
         scrollbarWidth: 'none', 
         msOverflowStyle: 'none'
       }}>
@@ -65,7 +79,7 @@ export default function AssignmentLayout() {
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   marginBottom: '-1px',
-                  flexShrink: 0 // Prevent text wrapping inside button
+                  flexShrink: 0
                 }}
               >
                 {tab.label}
@@ -75,7 +89,6 @@ export default function AssignmentLayout() {
         </div>
       </div>
 
-      {/* Grid Content */}
       <AssignmentList assignments={assignments} loading={loading} onSelect={setSelected} />
     </div>
   );

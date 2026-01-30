@@ -1,11 +1,9 @@
-import apiClient from '@/shared/lib/axios'; // Using BrainEvo's centralized axios instance
-import { Assignment, Submission } from '../../../shared/types/assignment.types';
+// Fix: Removed unused apiClient import
+import { Assignment, Submission } from '@/shared/types/assignment.types'; // Fixed Import Path
 
 class AssignmentService {
   /**
    * Fetches all assignments for the logged-in student.
-   * Note: In production, the backend handles filtering. For the prototype, 
-   * we use a mock delay to simulate network latency.
    */
   async getAssignments(): Promise<Assignment[]> {
     // Simulated API Call
@@ -21,7 +19,6 @@ class AssignmentService {
             dueDate: new Date(Date.now() + 172800000).toISOString(), // 2 days from now
             pointsTotal: 100,
             status: 'PENDING',
-            attachments: [{ name: 'Starter_Code.zip', url: '#', type: 'ZIP' }]
           },
           {
             id: 'asgn_2',
@@ -56,7 +53,6 @@ class AssignmentService {
   }
 
   async submitWork(assignmentId: string, data: { file?: File, link?: string }): Promise<boolean> {
-    // In production: const response = await apiClient.post(`/assignments/${assignmentId}/submit`, data);
     return new Promise((resolve) => {
       setTimeout(() => resolve(true), 1200);
     });
