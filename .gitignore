@@ -10,6 +10,7 @@ node_modules/
 /build
 /dist
 /.next/
+frontend/.next/
 /out/
 
 # Misc
@@ -52,3 +53,8 @@ logs
 .env
 .env.local
 .env.production
+
+# Documentation - exclude .md from commit except README
+*.md
+!README.md
+!readme.md

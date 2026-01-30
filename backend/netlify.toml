@@ -1,10 +1,22 @@
-# Note: This is for reference only
-# Netlify Functions are not recommended for full Express APIs
-# Deploy backend separately on Railway, Render, or similar service
+# Backend API deployed as Netlify Functions (serverless)
+# In Netlify: set Base directory = "backend" for this site
 
 [build]
-  command = "echo 'Backend should be deployed separately'"
+  base = "."
+  command = "npm install"
   publish = "."
 
-# If you must use Netlify Functions, you would need to convert
-# your Express routes to serverless functions (not recommended)
+# Functions: Express app runs as a single serverless function
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Redirect all API traffic to the serverless function
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
+  force = true
+
+[build.environment]
+  NODE_VERSION = "18"
