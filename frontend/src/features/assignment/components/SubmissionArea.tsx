@@ -10,10 +10,10 @@ interface Props {
   onSuccess: () => void;
 }
 
-export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }: Props) {
+export default function SubmissionArea({ assignmentId: _assignmentId, isSubmitted, onSuccess }: Props) {
   const [method, setMethod] = useState<'FILE' | 'LINK'>('FILE');
   const [linkUrl, setLinkUrl] = useState('');
-  
+
   // Use our custom hook for file handling logic
   const { file, triggerFileDialog, handleFileChange, clearFile, fileInputRef } = useFileUpload();
 
@@ -78,8 +78,8 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
   // --- Success State View ---
   if (isSubmitted) {
     return (
-      <div style={{ 
-        padding: '24px', backgroundColor: theme.colors.successBg, 
+      <div style={{
+        padding: '24px', backgroundColor: theme.colors.successBg,
         borderRadius: theme.borderRadius.lg, border: `1px solid #bbf7d0`,
         textAlign: 'center', marginTop: '32px'
       }}>
@@ -93,26 +93,26 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
   return (
     <div className="submission-container">
       <style>{css}</style>
-      
+
       {/* --- Hidden Input for File Selection --- */}
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleFileChange} 
-        style={{ display: 'none' }} 
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
         accept=".pdf,.doc,.docx,.zip,.jpg,.png" // Limit file types if needed
       />
 
       <h3 style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textMain, marginBottom: '20px' }}>
         Submit Assignment
       </h3>
-      
+
       {/* --- Method Toggle Buttons --- */}
       <div className="toggle-group">
-        <button 
-          onClick={() => setMethod('FILE')} 
+        <button
+          onClick={() => setMethod('FILE')}
           className="toggle-btn"
-          style={{ 
+          style={{
             backgroundColor: method === 'FILE' ? theme.colors.bgSurface : 'transparent',
             color: method === 'FILE' ? theme.colors.primary : theme.colors.textSecondary,
             boxShadow: method === 'FILE' ? theme.shadows.sm : 'none',
@@ -120,10 +120,10 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
         >
           <Upload size={16} /> File Upload
         </button>
-        <button 
-          onClick={() => setMethod('LINK')} 
+        <button
+          onClick={() => setMethod('LINK')}
           className="toggle-btn"
-          style={{ 
+          style={{
             backgroundColor: method === 'LINK' ? theme.colors.bgSurface : 'transparent',
             color: method === 'LINK' ? theme.colors.primary : theme.colors.textSecondary,
             boxShadow: method === 'LINK' ? theme.shadows.sm : 'none',
@@ -135,8 +135,8 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
 
       {/* --- File Upload Area --- */}
       {method === 'FILE' ? (
-        <div 
-          className="upload-zone" 
+        <div
+          className="upload-zone"
           onClick={!file ? triggerFileDialog : undefined} // Only trigger open if no file selected
           onKeyDown={!file ? (e => { if (e.key === 'Enter' || e.key === ' ') { triggerFileDialog(); } }) : undefined}
           tabIndex={!file ? 0 : -1}
@@ -147,9 +147,9 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
           {file ? (
             // Selected File View
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-              <div style={{ 
-                width: '48px', height: '48px', borderRadius: '12px', 
-                backgroundColor: theme.colors.successBg, display: 'flex', alignItems: 'center', justifyContent: 'center' 
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '12px',
+                backgroundColor: theme.colors.successBg, display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
                 <FileText size={24} color={theme.colors.success} />
               </div>
@@ -161,9 +161,9 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
                   Ready to submit ({Math.round(file.size / 1024)} KB)
                 </p>
               </div>
-              
+
               {/* Clear File Button */}
-              <button 
+              <button
                 onClick={(e) => { e.stopPropagation(); clearFile(); }}
                 style={{
                   position: 'absolute', top: '12px', right: '12px',
@@ -176,9 +176,9 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
           ) : (
             // Empty State View
             <>
-              <div style={{ 
-                width: '48px', height: '48px', borderRadius: '50%', backgroundColor: theme.colors.bgHover, 
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' 
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '50%', backgroundColor: theme.colors.bgHover,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px'
               }}>
                 <Upload size={24} color={theme.colors.textSecondary} />
               </div>
@@ -194,22 +194,22 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
       ) : (
         // --- Link Input Area ---
         <div style={{ position: 'relative' }}>
-          <div style={{ 
-            position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', 
-            color: theme.colors.textSecondary 
+          <div style={{
+            position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
+            color: theme.colors.textSecondary
           }}>
             <LinkIcon size={18} />
           </div>
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="https://drive.google.com/..."
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '16px 16px 16px 48px', 
-              borderRadius: theme.borderRadius.md, 
-              border: `1px solid ${theme.colors.border}`, 
+            style={{
+              width: '100%',
+              padding: '16px 16px 16px 48px',
+              borderRadius: theme.borderRadius.md,
+              border: `1px solid ${theme.colors.border}`,
               fontSize: '14px',
               outline: 'none',
               backgroundColor: theme.colors.bgSurface,
@@ -224,11 +224,11 @@ export default function SubmissionArea({ assignmentId, isSubmitted, onSuccess }:
       {/* --- Footer Action Button --- */}
       <div className="submit-wrapper">
         <div style={{ width: '100%' }} className="submit-btn-container">
-          <ActionButton 
-            label={file || (method === 'LINK' && linkUrl.length > 5) ? "Submit Assignment" : "Select File to Submit"} 
-            onClick={onSuccess} 
+          <ActionButton
+            label={file || (method === 'LINK' && linkUrl.length > 5) ? "Submit Assignment" : "Select File to Submit"}
+            onClick={onSuccess}
             disabled={method === 'FILE' ? !file : linkUrl.length < 5}
-            style={{ width: '100%', padding: '12px' }} 
+            style={{ width: '100%', padding: '12px' }}
           />
         </div>
       </div>

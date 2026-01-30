@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import assignmentService from '../services/assignment.service';
-import { Assignment, AssignmentStatus } from '../../../shared/types/assignment.types';
+import { Assignment } from '../../../shared/types/assignment.types';
 
 export const useAssignments = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -18,20 +18,20 @@ export const useAssignments = () => {
       setLoading(true);
       const data = await assignmentService.getAssignments();
       setAssignments(data);
-    } catch (err) {
+    } catch {
       setError('Unable to load assignments.');
     } finally {
       setLoading(false);
     }
   };
 
-  const submitAssignment = async (id: string, payload: any) => {
+  const submitAssignment = async (id: string, payload: { file?: File; link?: string }) => {
     try {
       setSubmitting(true);
       await assignmentService.submitWork(id, payload);
       await fetchData(); // Refresh list after submission
       return true;
-    } catch (err) {
+    } catch {
       return false;
     } finally {
       setSubmitting(false);

@@ -2,7 +2,7 @@ const assignmentService = require('./assignment.service');
 
 exports.getAssignments = async (req, res, next) => {
   try {
-    const assignments = await assignmentService.findAll();
+    const assignments = await assignmentService.findAllForUser(req.user.id);
     res.json({ success: true, count: assignments.length, data: assignments });
   } catch (error) {
     next(error);
@@ -11,7 +11,7 @@ exports.getAssignments = async (req, res, next) => {
 
 exports.getAssignment = async (req, res, next) => {
   try {
-    const assignment = await assignmentService.findById(req.params.id);
+    const assignment = await assignmentService.findByIdForUser(req.params.id, req.user.id);
     if (!assignment) {
       return res.status(404).json({ message: 'Assignment not found' });
     }

@@ -1,62 +1,105 @@
-// Fix: Removed unused apiClient import
-import { Assignment, Submission } from '@/shared/types/assignment.types'; // Fixed Import Path
+import apiClient from '@/shared/lib/axios';
+import type { Assignment, Submission } from '@/shared/types/assignment.types';
+
+interface BackendAssignment {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  maxScore?: number;
+  pointsTotal?: number;
+  status: string;
+  subject?: string;
+  instructorName?: string;
+  course?: { title?: string; instructor?: { name?: string } };
+  mySubmission?: {
+    id: string;
+    assignmentId: string;
+    submittedAt: string;
+    fileUrl?: string;
+    linkUrl?: string;
+    grade?: number;
+    feedback?: string;
+  };
+  attachments?: Assignment['attachments'];
+}
+
+interface BackendListResponse {
+  success: boolean;
+  data: BackendAssignment[];
+  count?: number;
+}
+
+interface BackendSingleResponse {
+  success: boolean;
+  data: BackendAssignment;
+}
+
+function mapAssignment(a: BackendAssignment): Assignment {
+  return {
+    id: a.id,
+    title: a.title,
+    subject: a.subject ?? a.course?.title ?? 'Course',
+    instructorName: a.instructorName ?? a.course?.instructor?.name ?? 'Instructor',
+    description: a.description,
+    dueDate: typeof a.dueDate === 'string' ? a.dueDate : new Date(a.dueDate).toISOString(),
+    pointsTotal: a.pointsTotal ?? a.maxScore ?? 100,
+    status: a.status as Assignment['status'],
+    attachments: a.attachments,
+    mySubmission: a.mySubmission ? mapSubmission(a.mySubmission) : undefined,
+  };
+}
+
+function mapSubmission(s: BackendAssignment['mySubmission']): Submission | undefined {
+  if (!s) return undefined;
+  return {
+    id: s.id,
+    assignmentId: s.assignmentId,
+    submittedAt: s.submittedAt,
+    fileUrl: s.fileUrl,
+    linkUrl: s.linkUrl,
+    grade: s.grade,
+    feedback: s.feedback,
+  };
+}
 
 class AssignmentService {
-  /**
-   * Fetches all assignments for the logged-in student.
-   */
   async getAssignments(): Promise<Assignment[]> {
-    // Simulated API Call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: 'asgn_1',
-            title: 'Advanced React Patterns',
-            subject: 'Frontend Development',
-            instructorName: 'John Doe',
-            description: 'Implement a compound component pattern for a custom dropdown menu. Ensure accessibility standards are met.',
-            dueDate: new Date(Date.now() + 172800000).toISOString(), // 2 days from now
-            pointsTotal: 100,
-            status: 'PENDING',
-          },
-          {
-            id: 'asgn_2',
-            title: 'Database Normalization Task',
-            subject: 'Backend Engineering',
-            instructorName: 'Kush Kore',
-            description: 'Normalize the provided unnormalized table to 3NF. Provide the ER diagram.',
-            dueDate: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-            pointsTotal: 50,
-            status: 'OVERDUE',
-          },
-          {
-            id: 'asgn_3',
-            title: 'Intro to TypeScript',
-            subject: 'Web Development',
-            instructorName: 'John Doe',
-            description: 'Convert the existing JS project to TS using strict mode.',
-            dueDate: new Date(Date.now() - 604800000).toISOString(),
-            pointsTotal: 100,
-            status: 'GRADED',
-            mySubmission: {
-              id: 'sub_1',
-              assignmentId: 'asgn_3',
-              submittedAt: new Date(Date.now() - 700000000).toISOString(),
-              grade: 95,
-              feedback: 'Excellent type definitions. Very clean code structure!'
-            }
-          }
-        ]);
-      }, 800);
-    });
+    const response = await apiClient.get<BackendListResponse>('/api/assignments');
+    const data = response.data?.data ?? [];
+    return data.map(mapAssignment);
   }
 
-  async submitWork(assignmentId: string, data: { file?: File, link?: string }): Promise<boolean> {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(true), 1200);
-    });
+  async getAssignment(id: string): Promise<Assignment | null> {
+    const response = await apiClient.get<BackendSingleResponse>(`/api/assignments/${id}`);
+    const data = response.data?.data;
+    return data ? mapAssignment(data) : null;
+  }
+
+  async submitWork(
+    assignmentId: string,
+    data: { file?: File; link?: string }
+  ): Promise<boolean> {
+    const body: { assignmentId: string; content?: string; fileUrl?: string; linkUrl?: string } = {
+      assignmentId,
+    };
+    if (data.link) {
+      body.linkUrl = data.link;
+      body.content = data.link;
+    }
+    if (data.file) {
+      // --- FILE UPLOAD FEATURE CLOSED FOR NOW ---
+      // When backend POST /api/submissions/upload is enabled:
+      // const formData = new FormData();
+      // formData.append('file', data.file);
+      // const uploadRes = await apiClient.post<{ success: boolean; fileUrl?: string }>('/api/submissions/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      // if (uploadRes.data?.fileUrl) body.fileUrl = uploadRes.data.fileUrl;
+      body.content = `File: ${data.file.name}`;
+    }
+    const response = await apiClient.post<{ success: boolean }>('/api/submissions', body);
+    return response.data?.success ?? false;
   }
 }
 
-export default new AssignmentService();
+const assignmentService = new AssignmentService();
+export default assignmentService;
