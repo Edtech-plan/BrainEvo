@@ -4,13 +4,13 @@ import { Upload, Link as LinkIcon, CheckCircle, FileText, X } from 'lucide-react
 import ActionButton from '@/shared/components/live/ActionButton';
 import { useFileUpload } from '../hooks/useFileUpload'; // Import our new hook
 
-interface Props {
+interface SubmissionAreaProps {
   assignmentId: string;
   isSubmitted: boolean;
   onSuccess: () => void;
 }
 
-export default function SubmissionArea({ assignmentId: _assignmentId, isSubmitted, onSuccess }: Props) {
+export default function SubmissionArea({ assignmentId: _assignmentId, isSubmitted, onSuccess }: SubmissionAreaProps) {
   const [method, setMethod] = useState<'FILE' | 'LINK'>('FILE');
   const [linkUrl, setLinkUrl] = useState('');
 

@@ -65,6 +65,10 @@ export default function Dashboard() {
       router.push('/assignment');
       return;
     }
+    if (section === 'settings') {
+      router.push('/settings');
+      return;
+    }
     setActiveSection(section as Section);
   };
 

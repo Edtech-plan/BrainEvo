@@ -6,13 +6,13 @@ import FeedbackView from './FeedbackView';
 import SubmissionArea from './SubmissionArea';
 
 
-interface Props {
+interface AssignmentDeatilsProps {
   assignment: Assignment;
   onBack: () => void;
   onSuccess: () => void;
 }
 
-export default function AssignmentDetail({ assignment, onBack, onSuccess }: Props) {
+export default function AssignmentDetail({ assignment, onBack, onSuccess }: AssignmentDeatilsProps) {
   const isCompleted = assignment.status === 'SUBMITTED' || assignment.status === 'GRADED';
 
   return (
