@@ -9,9 +9,12 @@ const nextConfig = {
 
   // Image configuration
   images: {
-    domains: ['localhost'],
     // Add your production image domains here
     remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
       {
         protocol: 'https',
         hostname: '**.netlify.app',
