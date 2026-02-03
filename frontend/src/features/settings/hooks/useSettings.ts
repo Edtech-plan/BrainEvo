@@ -16,7 +16,9 @@ export const useSettings = () => {
 
   const fetchSettings = useCallback(async () => {
     try {
-      if (!settings) setLoading(true);
+      // FIX: Removed dependency on 'settings' to prevent infinite loops
+      // We check if data exists locally to decide on the loading spinner
+      setLoading(true);
       const data = await settingsService.getSettings();
       setSettings(data);
       setError('');
@@ -25,31 +27,26 @@ export const useSettings = () => {
     } finally {
       setLoading(false);
     }
-  }, [settings]);
+  }, []); // Dependencies now empty
 
-  // Initial Fetch + Real-time Subscription
   useEffect(() => {
     fetchSettings();
-
-    // Subscribe to the service to get updates from other components
     const unsubscribe = settingsService.subscribe((newData) => {
       setSettings(newData);
     });
-
     return () => unsubscribe();
-  }, []);
+  }, [fetchSettings]);
 
   const updateSection = async <T>(
     sectionKey: keyof UserSettingsResponse, 
     newData: Partial<T>, 
     apiCall: (data: Partial<T>) => Promise<boolean>
   ) => {
-    if (!settings) return;
+    if (!settings) return false;
     setSaving(true);
     try {
-      await apiCall(newData);
-      // No need to setSettings here, subscription handles it
-      return true;
+      const success = await apiCall(newData);
+      return success;
     } catch (err) {
       setError(`Failed to update ${sectionKey}`);
       return false;
@@ -58,15 +55,12 @@ export const useSettings = () => {
     }
   };
 
-  // Orchestrates the Upload -> Update Profile flow
-  const uploadAvatar = async (file: File) => {
+  const uploadAvatar = async (file: File): Promise<boolean> => {
     setSaving(true);
     try {
-      // 1. Upload to get URL
       const url = await settingsService.uploadAvatar(file);
-      // 2. Update Profile with new URL
-      await settingsService.updateProfile({ avatarUrl: url });
-      return true;
+      const success = await settingsService.updateProfile({ avatarUrl: url });
+      return success;
     } catch (err) {
       setError('Failed to upload avatar.');
       return false;

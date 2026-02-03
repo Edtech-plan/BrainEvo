@@ -7,7 +7,7 @@ import Sidebar from './Sidebar';
 import { theme } from '../ui/theme';
 
 // Import Shared Components
-import ConfirmationModal from '../ui/ConfirmationModel';
+import ConfirmationModal from '../ui/ConfirmationModal';
 import { useSettings } from '@/features/settings';
 
 interface DashboardLayoutProps {

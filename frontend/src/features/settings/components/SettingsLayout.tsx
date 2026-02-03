@@ -1,12 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { theme } from '@/shared/components/ui/theme';
 import { useSettings } from '../hooks/useSettings';
 import { User, Lock, Bell, Palette, Globe } from 'lucide-react';
+import { 
+  StudentProfile, 
+  AppearanceSettings, 
+  AccountSettings, 
+  NotificationSettings 
+} from '@/shared/types/settings.types';
 
 import { 
   ProfileHeader, PersonalInfoForm, SocialLinksForm,
   AppearanceTab, SecurityTab, NotificationTab, AccountTab
 } from './index';
+
+// --- Memoized Components ---
+
+interface ProfileSectionProps {
+  profile: StudentProfile;
+  updateProfile: (data: Partial<StudentProfile>) => Promise<boolean>;
+  uploadAvatar: (file: File) => Promise<boolean>;
+  saving: boolean;
+}
+
+const ProfileSection = memo(({ profile, updateProfile, uploadAvatar, saving }: ProfileSectionProps) => {
+  return (
+    <>
+      <ProfileHeader 
+        profile={profile} 
+        onUpdate={async (url: string) => {
+          const result = await updateProfile({ avatarUrl: url });
+          return result === true;
+        }} 
+        onUpload={uploadAvatar}
+        isUploading={saving}    
+      />
+      <PersonalInfoForm 
+        profile={profile} 
+        onSave={async (data: Partial<StudentProfile>) => {
+          const result = await updateProfile(data);
+          return result === true;
+        }} 
+      />
+      <SocialLinksForm 
+        links={profile.socialLinks} 
+        onSave={async (data: Partial<StudentProfile>) => {
+          const result = await updateProfile(data);
+          return result === true;
+        }} 
+      />
+    </>
+  );
+});
+// FIX: Add Display Name
+ProfileSection.displayName = 'ProfileSection';
+
+interface AppearanceSectionProps {
+  settings: AppearanceSettings;
+  onUpdate: (data: Partial<AppearanceSettings>) => Promise<boolean>;
+}
+
+const AppearanceSection = memo(({ settings, onUpdate }: AppearanceSectionProps) => (
+  <AppearanceTab settings={settings} onUpdate={onUpdate} />
+));
+// FIX: Add Display Name
+AppearanceSection.displayName = 'AppearanceSection';
+
+interface AccountSectionProps {
+  settings: AccountSettings;
+  onUpdate: (data: Partial<AccountSettings>) => Promise<boolean>;
+}
+
+const AccountSection = memo(({ settings, onUpdate }: AccountSectionProps) => (
+  <AccountTab 
+    settings={settings} 
+    onUpdate={async (data: Partial<AccountSettings>) => {
+      const result = await onUpdate(data);
+      return result === true;
+    }} 
+  />
+));
+// FIX: Add Display Name
+AccountSection.displayName = 'AccountSection';
+
+interface NotificationSectionProps {
+  settings: NotificationSettings;
+  onUpdate: (data: Partial<NotificationSettings>) => Promise<boolean>;
+}
+
+const NotificationSection = memo(({ settings, onUpdate }: NotificationSectionProps) => (
+  <NotificationTab settings={settings} onUpdate={onUpdate} />
+));
+// FIX: Add Display Name
+NotificationSection.displayName = 'NotificationSection';
+
+// --- Main Layout Component ---
 
 export default function SettingsLayout() {
   const { 
@@ -15,7 +103,7 @@ export default function SettingsLayout() {
     updateAppearance, updateNotifications, updateAccount 
   } = useSettings();
   
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState<string>('profile');
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: theme.colors.textSecondary }}>Loading settings...</div>;
   if (error || !settings) return <div style={{ padding: '40px', textAlign: 'center', color: theme.colors.error }}>{error}</div>;
@@ -65,39 +153,26 @@ export default function SettingsLayout() {
         <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         
         {activeTab === 'profile' && (
-          <>
-            <ProfileHeader 
-              profile={settings.profile} 
-              onUpdate={(url) => updateProfile({ avatarUrl: url })} 
-              onUpload={uploadAvatar}
-              isUploading={saving}    
-            />
-            <PersonalInfoForm 
-              profile={settings.profile} 
-              onSave={async (data) => {
-                const result = await updateProfile(data);
-                return result === true;
-              }} 
-            />
-            <SocialLinksForm 
-              links={settings.profile.socialLinks} 
-              onSave={async (data) => {
-                const result = await updateProfile(data);
-                return result === true;
-              }} 
-            />
-          </>
+          <ProfileSection 
+            profile={settings.profile}
+            updateProfile={updateProfile}
+            uploadAvatar={uploadAvatar}
+            saving={saving}
+          />
         )}
 
         {activeTab === 'appearance' && (
-          <AppearanceTab settings={settings.appearance} onUpdate={updateAppearance} />
+          <AppearanceSection 
+            settings={settings.appearance} 
+            onUpdate={updateAppearance} 
+          />
         )}
 
         {activeTab === 'account' && (
-          <AccountTab settings={settings.account} onUpdate={async (data) => {
-            const result = await updateAccount(data);
-            return result === true;
-          }} />
+          <AccountSection 
+            settings={settings.account} 
+            onUpdate={updateAccount} 
+          />
         )}
 
         {activeTab === 'security' && (
@@ -105,7 +180,10 @@ export default function SettingsLayout() {
         )}
 
         {activeTab === 'notifications' && (
-          <NotificationTab settings={settings.notifications} onUpdate={updateNotifications} />
+          <NotificationSection 
+            settings={settings.notifications} 
+            onUpdate={updateNotifications} 
+          />
         )}
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { theme } from '@/shared/components/ui/theme';
 import { AccountSettings } from '@/shared/types/settings.types';
 import { Globe, Clock, LogOut } from 'lucide-react';
-import ConfirmationModal from '@/shared/components/ui/ConfirmationModel'; // Import Shared Modal
+import ConfirmationModal from '@/shared/components/ui/ConfirmationModal'; // Import Shared Modal
 
 interface AccountTabProps {
   settings: AccountSettings;
