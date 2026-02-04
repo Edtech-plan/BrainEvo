@@ -40,7 +40,9 @@ export default function AssignmentsPage() {
     const routes: Record<string, string> = {
       'live-classes': '/live-classes',
       'calendar': '/calendar',
-      'overview': '/dashboard'
+      'overview': '/dashboard',
+      'settings': '/settings',
+      'projects': '/assignment'
     };
 
     if (routes[section]) {

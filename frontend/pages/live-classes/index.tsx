@@ -53,6 +53,10 @@ export default function LiveClasses() {
       router.push('/assignment');
       return;
     }
+    if (section === 'settings') {
+      router.push('/settings');
+      return;
+    }
     // For other sections, navigate to dashboard with that section
     router.push(`/dashboard?section=${section}`);
   };

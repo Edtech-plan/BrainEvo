@@ -3,12 +3,12 @@ import { theme } from '@/shared/components/ui/theme';
 import { Assignment } from '../../../shared/types/assignment.types';
 import { Calendar, ChevronRight } from 'lucide-react';
 
-interface Props {
+interface AssignmentCardProps {
   assignment: Assignment;
   onClick: () => void;
 }
 
-export default function AssignmentCard({ assignment, onClick }: Props) {
+export default function AssignmentCard({ assignment, onClick }: AssignmentCardProps) {
   const isOverdue = assignment.status === 'OVERDUE';
   const isGraded = assignment.status === 'GRADED';
 

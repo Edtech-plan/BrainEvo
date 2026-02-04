@@ -11,14 +11,18 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../src/shared/hooks/useAuth';
 import { DashboardLayout } from '../../src/shared/components/layout';
-import { CalendarView } from '@/features/calendar';
 import { theme } from '../../src/shared/components/ui/theme';
 import type { UserRole } from '../../src/shared/types';
 
-export default function Calendar() {
+// Import from the feature entry point (Barrel Export)
+import { SettingsLayout } from '@/features/settings';
+
+export default function SettingsPage() {
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
-  const [activeSection] = useState('calendar'); // eslint-disable-line @typescript-eslint/no-unused-vars
+  
+  // Initialize active section to 'settings' so the sidebar highlights correctly
+  const [activeSection] = useState('settings'); 
 
   useEffect(() => {
     if (!loading && !isAuthenticated) router.push('/login');
@@ -27,33 +31,29 @@ export default function Calendar() {
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
       const role = user.role as UserRole;
+      // Redirect non-students to their respective dashboards
       if (role === 'teacher') router.push('/teacher/dashboard');
       else if (role === 'organization_admin') router.push('/admin/dashboard');
     }
   }, [loading, isAuthenticated, user, router]);
 
   const handleNavigation = (section: string) => {
-    if (section === 'calendar') {
-      return; // Already on calendar page
+    // Prevent reloading if already on the settings page
+    if (section === 'settings') return;
+    
+    const routes: Record<string, string> = {
+      'live-classes': '/live-classes',
+      'calendar': '/calendar',
+      'projects': '/assignment', // Navigate to the Assignments page
+      'overview': '/dashboard',
+      'settings': '/settings'
+    };
+
+    if (routes[section]) {
+      router.push(routes[section]);
+    } else {
+      router.push(`/dashboard?section=${section}`);
     }
-    if (section === 'live-classes') {
-      router.push('/live-classes');
-      return;
-    }
-    if (section === 'overview') {
-      router.push('/dashboard');
-      return;
-    }
-    if (section === 'projects') {
-      router.push('/assignment');
-      return;
-    }
-    if (section === 'settings') {
-      router.push('/settings');
-      return;
-    }
-    // For other sections, navigate to dashboard with that section
-    router.push(`/dashboard?section=${section}`);
   };
 
   const navItems = [
@@ -89,7 +89,9 @@ export default function Calendar() {
       activeSection={activeSection}
       onSectionChange={handleNavigation}
     >
-      <CalendarView />
+      <div style={{ paddingBottom: '40px' }}>
+        <SettingsLayout />
+      </div>
     </DashboardLayout>
   );
 }

@@ -3,12 +3,12 @@ import { theme } from '@/shared/components/ui/theme';
 import { Submission } from '@/shared/types/assignment.types'; // Fixed Import Path
 import { Award, MessageCircle } from 'lucide-react';
 
-interface Props {
+interface FeedBackProps {
   submission: Submission;
   totalPoints: number;
 }
 
-export default function FeedbackView({ submission, totalPoints }: Props) {
+export default function FeedbackView({ submission, totalPoints }: FeedBackProps) {
   return (
     <div style={{ borderTop: `1px solid ${theme.colors.border}`, paddingTop: '40px' }}>
       <div style={{ display: 'flex', gap: '24px' }}>
