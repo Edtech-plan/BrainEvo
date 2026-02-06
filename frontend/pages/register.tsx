@@ -3,15 +3,16 @@ import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '../src/shared/hooks/useAuth';
+import { useAuth } from '../src/features/auth/hooks/useAuth';
+import { getDashboardRoute } from '../src/shared/utils/routing';
 import { Button, Input } from '../src/shared/components/ui'; // Use shared components
-import RoleSelector from '../src/shared/components/auth/RoleSelector';
-import LearnerForm from '../src/shared/components/auth/LearnerForm';
-import TeacherForm from '../src/shared/components/auth/TeacherForm';
-import AdminForm from '../src/shared/components/auth/AdminForm';
+import RoleSelector from '../src/features/auth/components/RoleSelector';
+import LearnerForm from '../src/features/auth/components/LearnerForm';
+import TeacherForm from '../src/features/auth/components/TeacherForm';
+import AdminForm from '../src/features/auth/components/AdminForm';
 import { initializeGoogleSignIn } from '../src/shared/utils/googleAuth';
 import invitationService from '../src/modules/invitation/invitation.service';
-import type { UserRole, RegisterUserData, GooglePromptNotification } from '../src/shared/types';
+import type { UserRole, RegisterUserData, GooglePromptNotification, User } from '../src/shared/types';
 import type { LearnerFormData, TeacherFormData, AdminFormData, FormErrors, InvitationData } from '../src/shared/types/forms.types';
 import type { AppErrorType } from '../src/shared/types/errors.types';
 import { getErrorMessage } from '../src/shared/types/errors.types';
@@ -19,7 +20,7 @@ import { ArrowLeft, Sparkles, User, GraduationCap, Building2 } from 'lucide-reac
 
 const Register: NextPage = () => {
   const router = useRouter();
-  const { register, isAuthenticated, loading: authLoading } = useAuth();
+  const { register, isAuthenticated, loading: authLoading, user } = useAuth();
 
   // State
   const [selectedRole, setSelectedRole] = useState<UserRole | ''>('');
@@ -71,15 +72,29 @@ const Register: NextPage = () => {
     if (router.isReady) verifyInviteToken();
   }, [router.isReady, router.query]);
 
-  // Redirect if Auth
+  // Redirect if already authenticated (based on role)
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-       router.push('/dashboard');
+    if (!authLoading && isAuthenticated && user) {
+      router.push(getDashboardRoute(user.role));
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, user, router]);
 
   // Handlers
-  const handleRoleChange = (role: UserRole) => { setSelectedRole(role); setErrors({}); setErrorMessage(''); };
+  const handleRoleChange = (role: UserRole) => {
+    // Prevent manual admin sign-up (admin accounts are provisioned by BrainEvo team)
+    if (!inviteData && role === 'organization_admin') {
+      setSelectedRole('');
+      setErrors({});
+      setErrorMessage(
+        'Admin accounts are created by the BrainEvo team. Please contact brainevo.helpdesk@gmail.com.'
+      );
+      return;
+    }
+
+    setSelectedRole(role);
+    setErrors({});
+    setErrorMessage('');
+  };
   
   const handleLearnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLearnerData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -138,8 +153,8 @@ const Register: NextPage = () => {
           registerData = { ...adminData, role: 'organization_admin' };
       }
 
-      await register(registerData);
-      // Auth hook handles redirect
+      const createdUser: User = await register(registerData);
+      router.push(getDashboardRoute(createdUser.role));
     } catch (error: AppErrorType) {
       setErrorMessage(getErrorMessage(error) || 'Registration failed.');
     } finally {

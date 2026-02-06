@@ -3,10 +3,11 @@ import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '../src/shared/hooks/useAuth';
+import { useAuth } from '../src/features/auth/hooks/useAuth';
+import { getDashboardRoute } from '../src/shared/utils/routing';
 import { Input, Button } from '../src/shared/components/ui';
 import { initializeGoogleSignIn, handleGoogleSignIn as parseGoogleCredential } from '../src/shared/utils/googleAuth';
-import authService from '../src/modules/auth/auth.service';
+import { authService } from '../src/features/auth';
 import type { GooglePromptNotification, GoogleCredentialResponse } from '../src/shared/types';
 import type { AppErrorType } from '../src/shared/types/errors.types';
 import { getErrorMessage } from '../src/shared/types/errors.types';
@@ -14,7 +15,7 @@ import { ArrowLeft, CheckCircle2 } from 'lucide-react'; // Assuming lucide-react
 
 const Login: NextPage = () => {
   const router = useRouter();
-  const { login, isAuthenticated, loading: authLoading } = useAuth();
+  const { login, isAuthenticated, loading: authLoading, user } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -25,18 +26,12 @@ const Login: NextPage = () => {
     initializeGoogleSignIn();
   }, []);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (role-based)
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const dashboardRoutes: Record<string, string> = {
-        learner: '/dashboard',
-        teacher: '/teacher/dashboard',
-        organization_admin: '/admin/dashboard'
-      };
-      router.push(dashboardRoutes[user.role] || '/dashboard');
+    if (!authLoading && isAuthenticated && user) {
+      router.push(getDashboardRoute(user.role));
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, user, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -65,14 +60,8 @@ const Login: NextPage = () => {
 
     setIsLoading(true);
     try {
-      await login(formData.email, formData.password);
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const dashboardRoutes: Record<string, string> = {
-        learner: '/dashboard',
-        teacher: '/teacher/dashboard',
-        organization_admin: '/admin/dashboard'
-      };
-      router.push(dashboardRoutes[user.role] || '/dashboard');
+      const loggedInUser = await login(formData.email, formData.password);
+      router.push(getDashboardRoute(loggedInUser.role));
     } catch (error: AppErrorType) {
       setErrorMessage(getErrorMessage(error) || 'Login failed. Please try again.');
     } finally {
@@ -100,11 +89,11 @@ const Login: NextPage = () => {
                   localStorage.setItem('user', JSON.stringify(authResponse.user));
                 }
                 const dashboardRoutes: Record<string, string> = {
-                  learner: '/dashboard',
+                  learner: '/student/dashboard',
                   teacher: '/teacher/dashboard',
                   organization_admin: '/admin/dashboard'
                 };
-                router.push(dashboardRoutes[authResponse.user.role] || '/dashboard');
+                router.push(dashboardRoutes[authResponse.user.role] || '/student/dashboard');
               }
             } catch (error: AppErrorType) {
               setErrorMessage(getErrorMessage(error) || 'Google sign-in failed. Please try again.');
