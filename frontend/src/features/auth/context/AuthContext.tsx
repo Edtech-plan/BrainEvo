@@ -8,9 +8,9 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
-  register: (userData: RegisterUserData) => Promise<void>;
+  register: (userData: RegisterUserData) => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(response.data.user);
             setIsAuthenticated(true);
           }
-        } catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
+        } catch (error: AppErrorType) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }
@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     try {
       const response = await authService.login(email, password);
       if (response.success && response.token) {
@@ -56,14 +56,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         setUser(response.user);
         setIsAuthenticated(true);
+        return response.user;
       }
-    } catch (error) {
-      const errorMessage = getErrorMessage(error as AppErrorType);
-      throw new Error(errorMessage || 'Login failed');
+      throw new Error('Login failed');
+    } catch (error: AppErrorType) {
+      throw new Error(getErrorMessage(error) || 'Login failed');
     }
   };
 
-  const register = async (userData: RegisterUserData) => {
+  const register = async (userData: RegisterUserData): Promise<User> => {
     try {
       const response = await authService.register(userData);
       if (response.success && response.token) {
@@ -73,10 +74,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         setUser(response.user);
         setIsAuthenticated(true);
+        return response.user;
       }
-    } catch (error) {
-      const errorMessage = getErrorMessage(error as AppErrorType);
-      throw new Error(errorMessage || 'Registration failed');
+      throw new Error('Registration failed');
+    } catch (error: AppErrorType) {
+      throw new Error(getErrorMessage(error) || 'Registration failed');
     }
   };
 
