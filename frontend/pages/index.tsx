@@ -3,20 +3,21 @@ import type { NextPage } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useAuth } from '../src/shared/hooks/useAuth';
+import { useAuth } from '../src/features/auth/hooks/useAuth';
+import { getDashboardRoute } from '../src/shared/utils/routing';
 import { BarChart3, Settings, ShieldCheck, PlayCircle, ChevronRight, Menu } from 'lucide-react';
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to appropriate dashboard if already authenticated
   React.useEffect(() => {
-    if (!loading && isAuthenticated) {
-      router.push('/dashboard');
+    if (!loading && isAuthenticated && user) {
+      router.push(getDashboardRoute(user.role));
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, user, router]);
 
   if (loading) {
     return (
@@ -64,7 +65,7 @@ const Home: NextPage = () => {
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <Link href="/dashboard">
+              <Link href="/student/dashboard">
                 <button className="px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-all hover:shadow-lg">
                   Go to Dashboard
                 </button>

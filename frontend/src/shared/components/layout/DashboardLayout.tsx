@@ -8,7 +8,7 @@ import { theme } from '../ui/theme';
 
 // Import Shared Components
 import ConfirmationModal from '../ui/ConfirmationModal';
-import { useSettings } from '@/features/settings';
+import { useSettings } from '@/features/student/settings';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -134,7 +134,7 @@ export default function DashboardLayout({
             <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} style={styles.iconBtn} className="desktop-visible">
               {sidebarCollapsed ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
             </button>
-            <Link href="/dashboard" style={styles.logo}>BrainEvo</Link>
+            <Link href="/student/dashboard" style={styles.logo}>BrainEvo</Link>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -173,7 +173,7 @@ export default function DashboardLayout({
                   overflow: 'hidden', animation: 'fadeIn 0.1s ease'
                 }}>
                   {/* Menu Items */}
-                  <Link href="/settings" style={styles.menuItem} onClick={() => setProfileMenuOpen(false)}>
+                  <Link href="/student/settings" style={styles.menuItem} onClick={() => setProfileMenuOpen(false)}>
                     <Settings size={16} /> Settings
                   </Link>
                   
