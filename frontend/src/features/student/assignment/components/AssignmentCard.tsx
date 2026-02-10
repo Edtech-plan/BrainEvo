@@ -1,6 +1,6 @@
 import React from 'react';
 import { theme } from '@/shared/components/ui/theme';
-import { Assignment } from '../../../shared/types/assignment.types';
+import { Assignment } from '../../../../shared/types/assignment.types';
 import { Calendar, ChevronRight } from 'lucide-react';
 
 interface AssignmentCardProps {

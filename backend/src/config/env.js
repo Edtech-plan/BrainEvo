@@ -17,7 +17,7 @@ const env = {
   JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
 
   // CORS Configuration
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3001',
 };
 
 // Validate required environment variables in production

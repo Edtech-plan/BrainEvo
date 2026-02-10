@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { Button } from '../ui';
 
 export const Navbar: React.FC = () => {

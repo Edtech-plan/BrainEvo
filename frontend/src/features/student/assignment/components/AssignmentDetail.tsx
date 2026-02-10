@@ -1,6 +1,6 @@
 import React from 'react';
 import { theme } from '@/shared/components/ui/theme';
-import { Assignment } from '../../../shared/types/assignment.types';
+import { Assignment } from '../../../../shared/types/assignment.types';
 import { ArrowLeft, Download, ExternalLink, Calendar, FileText } from 'lucide-react';
 import FeedbackView from './FeedbackView';
 import SubmissionArea from './SubmissionArea';

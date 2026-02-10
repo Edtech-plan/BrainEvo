@@ -8,10 +8,6 @@ export * from './invitation.types';
 export * from './api.types';
 export * from './errors.types';
 export * from './forms.types';
-export * from './google.types';
 export * from './course.types';
 export * from './assignment.types';
 export * from './liveClass.types';
-
-// Re-export GoogleAuthData for convenience
-export type { GoogleAuthData } from './user.types';

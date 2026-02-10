@@ -1,5 +1,5 @@
-import apiClient from '../../../shared/lib/axios';
-import type { LiveClass, CreateLiveClassData, UpdateLiveClassData, ApiResponse } from '../../../shared/types';
+import apiClient from '../../../../shared/lib/axios';
+import type { LiveClass, CreateLiveClassData, UpdateLiveClassData, ApiResponse } from '../../../../shared/types';
 
 /**
  * Live Class Service

@@ -3,7 +3,7 @@
  */
 
 export type UserRole = 'learner' | 'teacher' | 'organization_admin';
-export type AuthProvider = 'email' | 'google';
+export type AuthProvider = 'email';
 
 export interface User {
   id: string;
@@ -14,7 +14,6 @@ export interface User {
   qualifications?: string;
   subjectsTaught?: string[];
   authProvider?: AuthProvider;
-  avatar?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -29,15 +28,6 @@ export interface RegisterUserData {
   subjectsTaught?: string | string[];
   inviteToken?: string;
   authProvider?: AuthProvider;
-  googleId?: string;
-  avatar?: string;
-}
-
-export interface GoogleAuthData {
-  googleId: string;
-  email: string;
-  name: string;
-  avatar?: string;
 }
 
 export interface LoginCredentials {

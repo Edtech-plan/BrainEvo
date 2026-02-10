@@ -1,6 +1,6 @@
-import apiClient from '../../../shared/lib/axios';
-import type { ApiResponse } from '../../../shared/types';
-import type { DashboardAnalytics, CourseAnalytics } from '../../../shared/types/analytics.types';
+import apiClient from '../../../../shared/lib/axios';
+import type { ApiResponse } from '../../../../shared/types';
+import type { DashboardAnalytics, CourseAnalytics } from '../../../../shared/types/analytics.types';
 
 /**
  * Dashboard Service

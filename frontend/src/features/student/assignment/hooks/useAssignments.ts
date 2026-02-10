@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import assignmentService from '../services/assignment.service';
-import { Assignment } from '../../../shared/types/assignment.types';
+import { Assignment } from '../../../../shared/types/assignment.types';
 
 export const useAssignments = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);

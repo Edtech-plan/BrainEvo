@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import liveClassService from '../services/liveClass.service';
-import type { LiveClass } from '../../../shared/types';
-import type { AppErrorType } from '../../../shared/types/errors.types';
-import { getErrorMessage } from '../../../shared/types/errors.types';
+import type { LiveClass } from '../../../../shared/types';
+import type { AppErrorType } from '../../../../shared/types/errors.types';
+import { getErrorMessage } from '../../../../shared/types/errors.types';
 
 /**
  * Live Classes Hook

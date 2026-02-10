@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import dashboardService from '../services/dashboard.service';
-import type { AppErrorType } from '../../../shared/types/errors.types';
-import type { DashboardAnalytics } from '../../../shared/types/analytics.types';
-import { getErrorMessage } from '../../../shared/types/errors.types';
+import type { AppErrorType } from '../../../../shared/types/errors.types';
+import type { DashboardAnalytics } from '../../../../shared/types/analytics.types';
+import { getErrorMessage } from '../../../../shared/types/errors.types';
 
 /**
  * Dashboard Hook
