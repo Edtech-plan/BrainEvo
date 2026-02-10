@@ -5,3 +5,27 @@
 /* AG Grid Styles */
 @import 'ag-grid-community/styles/ag-grid.css';
 @import 'ag-grid-community/styles/ag-theme-alpine.css';
+
+/* Glass Card Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Pattern Background */
+.pattern-bg {
+  background-color: #f1f5f9;
+  background-image: radial-gradient(#cbd5e1 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+}
+
+.dark .pattern-bg {
+  background-color: #0f172a;
+  background-image: radial-gradient(#334155 0.5px, transparent 0.5px);
+}

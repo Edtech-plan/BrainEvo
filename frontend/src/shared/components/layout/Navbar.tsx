@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { Button } from '../ui';
 
 export const Navbar: React.FC = () => {
@@ -110,7 +110,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center space-x-3 ml-auto">
             {isAuthenticated ? (
               <>
-                <Link href="/dashboard">
+                <Link href="/student/dashboard">
                   <button className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors">
                     Dashboard
                   </button>

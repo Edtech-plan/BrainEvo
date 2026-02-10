@@ -13,7 +13,6 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "serverless-http": "^3.2.0",
     "bcryptjs": "^2.4.3",
     "bson": "^6.10.4",
     "cors": "^2.8.5",
@@ -23,7 +22,8 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "serverless-http": "^3.2.0"
   },
   "devDependencies": {
     "eslint": "^8.55.0",

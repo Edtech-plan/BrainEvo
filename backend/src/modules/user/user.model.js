@@ -17,20 +17,28 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 6,
+    minlength: [6, 'Password must be at least 6 characters'],
+  },
+  avatar: {
+    type: String,
   },
   role: {
     type: String,
     enum: ['learner', 'teacher', 'organization_admin'],
     default: 'learner',
   },
+  organizationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Organization',
+    default: null,
+  },
 }, {
   timestamps: true,
 });
 
-// Hash password before saving
+// Hash password before saving (only if password exists and is modified)
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });

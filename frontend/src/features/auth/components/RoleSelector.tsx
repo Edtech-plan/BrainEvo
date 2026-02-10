@@ -1,5 +1,6 @@
 import React from 'react';
 import type { UserRole } from '../../../shared/types';
+import { GraduationCap, User, Building2 } from 'lucide-react';
 
 interface RoleSelectorProps {
   selectedRole: UserRole | '';
@@ -24,26 +25,26 @@ const RoleCard: React.FC<RoleCardProps> = ({ icon, label, active, onClick, disab
   };
 
   return (
-    <div
+    <button
       onClick={!disabled ? onClick : undefined}
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={disabled ? -1 : 0}
+      disabled={disabled}
       className={`
-        cursor-pointer rounded-lg border-2 flex flex-col items-center justify-center gap-1 transition-all
-        flex-1 min-h-[60px] py-2 px-1.5 bg-white shadow-sm
+        flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all group
         ${active
-          ? 'border-purple-600 bg-purple-50 text-purple-600 shadow-md'
-          : 'border-gray-300 hover:border-purple-400 hover:shadow-md text-gray-600'
+          ? 'border-primary bg-blue-50/50 dark:bg-blue-900/20'
+          : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/50 hover:border-blue-200 dark:hover:border-blue-900'
         }
-        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       `}
     >
-      <div className="flex-shrink-0">
+      <div className={`mb-1 ${active ? 'text-primary' : 'text-slate-400 group-hover:text-primary'}`}>
         {icon}
       </div>
-      <span className="text-[10px] font-semibold text-center leading-tight">{label}</span>
-    </div>
+      <span className={`text-xs font-semibold ${active ? 'text-primary' : 'text-slate-600 dark:text-slate-400 group-hover:text-primary'}`}>{label}</span>
+    </button>
   );
 };
 
@@ -52,40 +53,26 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ selectedRole, onRoleChange,
     {
       value: 'learner',
       label: 'Learner',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14v9M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9M4 9l8-5 8 5M4 9l8 5 8-5" />
-        </svg>
-      ),
+      icon: <GraduationCap className="text-2xl" />,
     },
     {
       value: 'teacher',
       label: 'Teacher',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
+      icon: <User size={20} />,
     },
     {
       value: 'organization_admin',
       label: 'Admin',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      ),
+      icon: <Building2 className="text-2xl" />,
     },
   ];
 
   return (
-    <div className="mb-6">
-      <div className="block text-sm font-medium text-gray-700 mb-2">
+    <div className="space-y-2">
+      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
         Select Role
-      </div>
-      <div className="flex gap-2 w-full" role="radiogroup">
+      </label>
+      <div className="grid grid-cols-3 gap-3" role="radiogroup">
         {roles.map((role) => (
           <RoleCard
             key={role.value}
