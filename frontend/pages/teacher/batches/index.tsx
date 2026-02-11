@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import {
   LayoutDashboard,
-  Users, // For "Batches"
-  ClipboardList, // For "Assignments"
-  Video, // For "Live Classes"
-  BarChart2, // For "Insights"
+  Users,
+  ClipboardList,
+  Video,
+  BarChart2,
   Settings,
 } from "lucide-react";
 
@@ -16,8 +16,11 @@ import { theme } from "../../../src/shared/components/ui/theme";
 import { getDashboardRoute } from "../../../src/shared/utils/routing";
 import { UserRole } from "../../../src/shared/types";
 
-// Feature Import: The main Assembler for the Dashboard Home
-import { Overview } from "../../../src/features/teacher/dashboard/components";
+// Feature Imports
+import {
+  BatchesList,
+  BatchDetail,
+} from "../../../src/features/teacher/batches";
 
 type Section =
   | "overview"
@@ -27,14 +30,16 @@ type Section =
   | "insights"
   | "settings";
 
-export default function TeacherDashboardPage() {
+export default function TeacherBatchesPage() {
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
 
-  // State to track which sidebar tab is active
-  const [activeSection, setActiveSection] = useState<Section>("overview");
+  // State for Sidebar Tab
+  const [activeSection, setActiveSection] = useState<Section>("batches");
+  // State for Batches Feature (List vs Detail)
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
-  // 1. Auth Guard: Redirect if not logged in or not a teacher
+  // 1. Auth Guard
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
@@ -49,56 +54,33 @@ export default function TeacherDashboardPage() {
 
   // 2. Navigation Handler
   const handleSectionChange = (sectionId: string) => {
-    // Navigate to specific feature pages
-    if (sectionId === "batches") {
-      router.push("/teacher/batches");
-      return;
-    }
-
-    // For the current page (Overview), just update state
+    // If clicking "Dashboard", go back to the Home Page
     if (sectionId === "overview") {
-      setActiveSection("overview");
+      router.push("/teacher/dashboard");
       return;
     }
 
-    // Handle other sections (Placeholders for now)
-    const section = sectionId as Section;
-    setActiveSection(section);
-    console.log(`Navigate to ${section} - Coming soon`);
+    // If clicking "Batches", reset the Detail view if open
+    if (sectionId === "batches") {
+      setSelectedBatchId(null);
+    }
+
+    // Update local state to render content or placeholder
+    setActiveSection(sectionId as Section);
   };
 
-  // 3. Teacher Sidebar Configuration
+  // 3. Sidebar Config
   const navItems = [
-    {
-      id: "overview",
-      label: "Dashboard",
-      icon: <LayoutDashboard size={20} />,
-    },
-    {
-      id: "batches",
-      label: "Batches",
-      icon: <Users size={20} />,
-    },
+    { id: "overview", label: "Dashboard", icon: <LayoutDashboard size={20} /> },
+    { id: "batches", label: "Batches", icon: <Users size={20} /> },
     {
       id: "assignments",
       label: "Assignments",
       icon: <ClipboardList size={20} />,
     },
-    {
-      id: "live-classes",
-      label: "Live Classes",
-      icon: <Video size={20} />,
-    },
-    {
-      id: "insights",
-      label: "Insights",
-      icon: <BarChart2 size={20} />,
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: <Settings size={20} />,
-    },
+    { id: "live-classes", label: "Live Classes", icon: <Video size={20} /> },
+    { id: "insights", label: "Insights", icon: <BarChart2 size={20} /> },
+    { id: "settings", label: "Settings", icon: <Settings size={20} /> },
   ];
 
   // 4. Loading State
@@ -113,9 +95,7 @@ export default function TeacherDashboardPage() {
           backgroundColor: theme.colors.bgMain,
         }}
       >
-        <style>
-          {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
-        </style>
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
         <div
           style={{
             width: "32px",
@@ -130,7 +110,6 @@ export default function TeacherDashboardPage() {
     );
   }
 
-  // 5. Render Dashboard
   if (!isAuthenticated || !user) return null;
 
   return (
@@ -140,13 +119,21 @@ export default function TeacherDashboardPage() {
       onSectionChange={handleSectionChange}
     >
       {/* 
-        This is where we switch content based on the active tab.
-        Currently, we only have the 'Overview' built.
+        LOGIC SWITCH:
+        1. If 'batches', show List or Detail.
+        2. If anything else, show Placeholder.
       */}
-      {activeSection === "overview" ? (
-        <Overview username={user.name} />
+      {activeSection === "batches" ? (
+        selectedBatchId ? (
+          <BatchDetail
+            batchId={selectedBatchId}
+            onBack={() => setSelectedBatchId(null)}
+          />
+        ) : (
+          <BatchesList onSelectBatch={(id: string) => setSelectedBatchId(id)} />
+        )
       ) : (
-        // Placeholder for other sections until they are built
+        // Placeholder for other sections
         <div
           style={{
             padding: "40px",
