@@ -136,7 +136,7 @@ export default function TeacherDashboardPage() {
         Currently, we only have the 'Overview' built.
       */}
       {activeSection === 'overview' ? (
-        <Overview />
+        <Overview username={user.name} />
       ) : (
         // Placeholder for other sections until they are built
         <div style={{ 
