@@ -38,15 +38,18 @@ export const useSettings = () => {
   }, [fetchSettings]);
 
   const updateSection = async <T>(
-    sectionKey: keyof UserSettingsResponse, 
-    newData: Partial<T>, 
-    apiCall: (data: Partial<T>) => Promise<boolean>
+    sectionKey: keyof UserSettingsResponse,
+    newData: Partial<T>,
+    apiCall: (data: Partial<T>) => Promise<{ success: boolean; data?: UserSettingsResponse }>
   ) => {
     if (!settings) return false;
     setSaving(true);
     try {
-      const success = await apiCall(newData);
-      return success;
+      const result = await apiCall(newData);
+      if (result.success && result.data) {
+        setSettings(result.data);
+      }
+      return result.success;
     } catch (err) {
       setError(`Failed to update ${sectionKey}`);
       return false;
@@ -59,8 +62,11 @@ export const useSettings = () => {
     setSaving(true);
     try {
       const url = await settingsService.uploadAvatar(file);
-      const success = await settingsService.updateProfile({ avatarUrl: url });
-      return success;
+      const result = await settingsService.updateProfile({ avatarUrl: url });
+      if (result.success && result.data) {
+        setSettings(result.data);
+      }
+      return result.success;
     } catch (err) {
       setError('Failed to upload avatar.');
       return false;
@@ -76,13 +82,13 @@ export const useSettings = () => {
     saving,
     refresh: fetchSettings,
     uploadAvatar,
-    updateProfile: (data: Partial<StudentProfile>) => 
+    updateProfile: (data: Partial<StudentProfile>) =>
       updateSection<StudentProfile>('profile', data, settingsService.updateProfile),
-    updateAppearance: (data: Partial<AppearanceSettings>) => 
+    updateAppearance: (data: Partial<AppearanceSettings>) =>
       updateSection<AppearanceSettings>('appearance', data, settingsService.updateAppearance),
-    updateAccount: (data: Partial<AccountSettings>) => 
+    updateAccount: (data: Partial<AccountSettings>) =>
       updateSection<AccountSettings>('account', data, settingsService.updateAccount),
-    updateNotifications: (data: Partial<NotificationSettings>) => 
+    updateNotifications: (data: Partial<NotificationSettings>) =>
       updateSection<NotificationSettings>('notifications', data, settingsService.updateNotifications),
   };
 };

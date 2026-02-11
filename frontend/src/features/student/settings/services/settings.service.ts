@@ -1,144 +1,96 @@
-import { 
-  UserSettingsResponse, 
-  StudentProfile, 
-  AppearanceSettings, 
-  AccountSettings, 
+import apiClient from '../../../../shared/lib/axios';
+import type {
+  UserSettingsResponse,
+  StudentProfile,
+  AppearanceSettings,
+  AccountSettings,
   NotificationSettings,
-  LoginSession 
-} from '@/shared/types/settings.types';
+  LoginSession,
+} from '../../../../shared/types/settings.types';
 
-// Initial Mock Data (The "Database")
-const INITIAL_DATA: UserSettingsResponse = {
-  profile: {
-    id: 'stu_123',
-    fullName: 'Yash Pagdhare',
-    email: 'yash.p@brainevo.com',
-    phone: '+91 98765 43210',
-    headline: 'Aspiring Full Stack Developer',
-    avatarUrl: '', // Empty string = No Avatar initially
-    socialLinks: { 
-      linkedin: 'https://linkedin.com/in/yash', 
-      portfolio: '' 
-    }
-  },
-  appearance: {
-    theme: 'light',
-    editorFontSize: 14,
-    editorKeymap: 'vscode'
-  },
-  account: {
-    timezone: 'Asia/Kolkata',
-    language: 'en'
-  },
-  notifications: {
-    assignmentCreated: { email: true, inApp: true },
-    gradeReleased: { email: true, inApp: true },
-    liveClassReminders: { email: true, inApp: true },
-    announcements: { email: false, inApp: true },
-    quietHours: { enabled: true, start: '22:00', end: '08:00' }
-  }
-};
+const API_BASE = '/api/settings';
+
+/**
+ * Convert File to base64 data URL for avatar upload
+ */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 class SettingsService {
-  // In-memory store to persist changes during the session
-  private _data: UserSettingsResponse = JSON.parse(JSON.stringify(INITIAL_DATA));
-  
-  // Listeners to notify components of changes
-  private _listeners: ((data: UserSettingsResponse) => void)[] = [];
-
-  /**
-   * Get current settings from memory
-   * FIX: Converted to Arrow Function to preserve 'this' context
-   */
-    getSettings = async (): Promise<UserSettingsResponse> => {
-    // Return immediately, no setTimeout needed for reading memory!
-        return Promise.resolve(JSON.parse(JSON.stringify(this._data)));
+  async getSettings(): Promise<UserSettingsResponse> {
+    const response = await apiClient.get<{ success: boolean; data: UserSettingsResponse }>(API_BASE);
+    if (!response.data.success || !response.data.data) {
+      throw new Error('Failed to load settings');
     }
-
-
-  /**
-   * Subscribe to changes
-   * FIX: Converted to Arrow Function
-   */
-  subscribe = (listener: (data: UserSettingsResponse) => void) => {
-    this._listeners.push(listener);
-    return () => {
-      this._listeners = this._listeners.filter(l => l !== listener);
-    };
+    return response.data.data;
   }
 
-  /**
-   * Internal helper to notify all subscribers
-   */
-  private _notify() {
-    const freshData = JSON.parse(JSON.stringify(this._data));
-    this._listeners.forEach(listener => listener(freshData));
+  subscribe(_listener: (data: UserSettingsResponse) => void): () => void {
+    return () => {};
   }
 
-  /**
-   * Simulate File Upload
-   * FIX: Converted to Arrow Function
-   */
-  uploadAvatar = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (file.size > 5 * 1024 * 1024) {
-          reject('File size exceeds 5MB limit.');
-          return;
-        }
-        if (!file.type.startsWith('image/')) {
-          reject('Invalid file type.');
-          return;
-        }
-        const mockUrl = URL.createObjectURL(file);
-        resolve(mockUrl);
-      }, 1000);
+  async uploadAvatar(file: File): Promise<string> {
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('File size exceeds 5MB limit.');
+    }
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Invalid file type.');
+    }
+    const base64 = await fileToBase64(file);
+    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/profile`, {
+      avatarUrl: base64,
     });
+    if (!response.data.success || !response.data.data?.profile?.avatarUrl) {
+      throw new Error('Failed to upload avatar.');
+    }
+    return response.data.data.profile.avatarUrl;
   }
 
-  // --- Update Methods (Converted to Arrow Functions to fix the Error) ---
+  async updateProfile(data: Partial<StudentProfile>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
+    const payload: Record<string, unknown> = {};
+    if (data.fullName !== undefined) payload.fullName = data.fullName;
+    if (data.phone !== undefined) payload.phone = data.phone;
+    if (data.headline !== undefined) payload.headline = data.headline;
+    if (data.avatarUrl !== undefined) payload.avatarUrl = data.avatarUrl;
+    if (data.socialLinks !== undefined) payload.socialLinks = data.socialLinks;
 
-  updateProfile = async (data: Partial<StudentProfile>): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // 'this' is now safe to use here
-        this._data.profile = { ...this._data.profile, ...data };
-        this._notify(); 
-        resolve(true);
-      }, 800);
-    });
+    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/profile`, payload);
+    return { success: response.data.success === true, data: response.data.data };
   }
 
-  updateAppearance = async (data: Partial<AppearanceSettings>): Promise<boolean> => {
-    return new Promise((resolve) => {
-      this._data.appearance = { ...this._data.appearance, ...data };
-      this._notify();
-      resolve(true);
-    });
-  }
-  
-  updateAccount = async (data: Partial<AccountSettings>): Promise<boolean> => {
-    return new Promise((resolve) => {
-      this._data.account = { ...this._data.account, ...data };
-      this._notify();
-      resolve(true);
-    });
+  async updateAppearance(data: Partial<AppearanceSettings>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
+    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/appearance`, data);
+    return { success: response.data.success === true, data: response.data.data };
   }
 
-  updateNotifications = async (data: Partial<NotificationSettings>): Promise<boolean> => {
-    return new Promise((resolve) => {
-      this._data.notifications = { ...this._data.notifications, ...data };
-      this._notify();
-      resolve(true);
-    });
+  async updateAccount(data: Partial<AccountSettings>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
+    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/account`, data);
+    return { success: response.data.success === true, data: response.data.data };
   }
 
-  getLoginHistory = async (): Promise<LoginSession[]> => {
+  async updateNotifications(data: Partial<NotificationSettings>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
+    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/notifications`, data);
+    return { success: response.data.success === true, data: response.data.data };
+  }
+
+  async getLoginHistory(): Promise<LoginSession[]> {
     return Promise.resolve([
-      { id: '1', device: 'Chrome (Windows)', location: 'Mumbai', ipAddress: '192.168.1.5', lastActive: new Date().toISOString(), isCurrent: true }
+      {
+        id: '1',
+        device: 'Chrome (Windows)',
+        location: 'Mumbai',
+        ipAddress: '192.168.1.5',
+        lastActive: new Date().toISOString(),
+        isCurrent: true,
+      },
     ]);
   }
 }
 
-// Export as Singleton
 export default new SettingsService();
