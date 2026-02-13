@@ -65,6 +65,11 @@ export default function TeacherBatchesPage() {
       setSelectedBatchId(null);
     }
 
+    if (sectionId === "live-classes") {
+      router.push("/teacher/live-classes");
+      return;
+    }
+
     // Update local state to render content or placeholder
     setActiveSection(sectionId as Section);
   };
