@@ -36,8 +36,13 @@ export const useBatchResources = (batchId: string) => {
     }
   };
 
-  const deleteResource = (id: string) => {
-    setResources((prev) => prev.filter((r) => r.id !== id));
+  const deleteResource = async (id: string) => {
+    try {
+      await BatchesService.deleteResource(batchId, id);
+      setResources((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      setError("Failed to delete resource");
+    }
   };
 
   return { resources, loading, isUploading, error, uploadFile, deleteResource };

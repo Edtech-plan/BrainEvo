@@ -5,8 +5,11 @@ const User = require('./user.model');
  * Business logic for user operations
  */
 class UserService {
-  async findAll() {
-    return await User.find().select('-password');
+  async findAll({ page = 1, limit = 20, skip = 0 } = {}) {
+    const query = User.find().select('-password');
+    const total = await User.countDocuments();
+    const users = await query.skip(skip).limit(limit).lean();
+    return { data: users, total };
   }
 
   async findById(id) {

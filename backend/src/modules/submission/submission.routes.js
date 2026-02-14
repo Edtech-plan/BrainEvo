@@ -1,19 +1,42 @@
 const express = require('express');
+const path = require('path');
+const multer = require('multer');
 const { body } = require('express-validator');
-const { create, getMySubmission, getByAssignment, grade } = require('./submission.controller');
+const { create, getMySubmission, getByAssignment, grade, uploadFile } = require('./submission.controller');
 const { auth, authorize } = require('../../guards/auth.guard');
 const validate = require('../../utils/validate');
 
 const router = express.Router();
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(process.cwd(), 'uploads'));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const ext = path.extname(file.originalname) || '';
+    cb(null, `${uniqueSuffix}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = /\.(pdf|doc|docx|txt|png|jpg|jpeg|zip)$/i;
+    if (allowed.test(file.originalname)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: pdf, doc, docx, txt, png, jpg, jpeg, zip'));
+    }
+  },
+});
+
 router.use(auth);
 
-// --- FILE UPLOAD FEATURE CLOSED FOR NOW ---
-// When enabled: install multer, add upload middleware, and uncomment below.
-// POST /upload would accept multipart/form-data file, store (e.g. to disk or S3), return { fileUrl }.
-// const multer = require('multer');
-// const upload = multer({ dest: 'uploads/' });
-// router.post('/upload', upload.single('file'), (req, res) => { ... return fileUrl ... });
+// @route   POST /api/submissions/upload
+// @desc    Upload file for submission, returns fileUrl
+router.post('/upload', upload.single('file'), uploadFile);
 
 router.post(
   '/',

@@ -5,6 +5,8 @@ const {
   getLiveClass,
   createLiveClass,
   updateLiveClass,
+  updateRecording,
+  getStats,
   deleteLiveClass,
 } = require('./liveClass.controller');
 const { auth, authorize } = require('../../guards/auth.guard');
@@ -13,6 +15,7 @@ const validate = require('../../utils/validate');
 const router = express.Router();
 
 router.get('/', getLiveClasses);
+router.get('/stats', auth, getStats);
 router.get('/:id', getLiveClass);
 
 router.use(auth);
@@ -29,6 +32,13 @@ router.post(
 );
 
 router.put('/:id', authorize('teacher', 'organization_admin'), updateLiveClass);
+router.patch(
+  '/:id/recording',
+  authorize('teacher', 'organization_admin'),
+  [body('recordingUrl').trim().notEmpty().withMessage('recordingUrl is required')],
+  validate,
+  updateRecording
+);
 router.delete('/:id', authorize('teacher', 'organization_admin'), deleteLiveClass);
 
 module.exports = router;

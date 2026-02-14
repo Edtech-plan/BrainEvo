@@ -5,8 +5,10 @@ import type { Course, CreateCourseData, UpdateCourseData, ApiResponse } from '..
  * Course Service
  */
 class CourseService {
-  async getCourses(): Promise<ApiResponse<Course[]>> {
-    const response = await apiClient.get<ApiResponse<Course[]>>('/api/courses');
+  async getCourses(page = 1, limit = 20): Promise<ApiResponse<Course[]>> {
+    const response = await apiClient.get<ApiResponse<Course[]>>(
+      `/api/courses?page=${page}&limit=${limit}`
+    );
     return response.data;
   }
 

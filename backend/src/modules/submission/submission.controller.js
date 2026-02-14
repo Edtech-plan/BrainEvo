@@ -1,13 +1,16 @@
 const submissionService = require('./submission.service');
 
-// --- FILE UPLOAD FEATURE CLOSED FOR NOW ---
-// exports.uploadFile = async (req, res, next) => {
-//   try {
-//     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-//     const fileUrl = `/uploads/${req.file.filename}`; // or S3 URL
-//     res.json({ success: true, fileUrl });
-//   } catch (err) { next(err); }
-// };
+exports.uploadFile = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ success: true, fileUrl });
+  } catch (err) {
+    next(err);
+  }
+};
 
 function handleError(err, res, next) {
   if (err.statusCode) {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "../../../auth/hooks/useAuth";
 import { useBatchDetails } from "../hooks/useBatchDetails";
 import { useBatchStudents } from "../hooks/useBatchStudents";
 import { useBatchResources } from "../hooks/useBatchResources";
@@ -7,6 +8,7 @@ import {
   BatchTabs,
   StudentTable,
   ResourceManager,
+  AddStudentModal,
 } from "./detail";
 import { theme } from "../../../../shared/components/ui/theme";
 
@@ -24,12 +26,24 @@ export const BatchDetail: React.FC<BatchDetailProps> = ({
     "roster",
   );
 
-  const { batch, stats, loading } = useBatchDetails(batchId);
-  const { students, loading: loadingS } = useBatchStudents(batchId);
+  const { user } = useAuth();
+  const { batch, stats, loading, refetch: refetchBatch } = useBatchDetails(batchId);
+  const { students, loading: loadingS, addStudent, removeStudent } = useBatchStudents(batchId);
 
-  // FIX: Destructure uploadFile and isUploading from the hook
+  const handleAddStudent = async (studentId: string) => {
+    await addStudent(studentId);
+    refetchBatch();
+  };
+
+  const handleRemoveStudent = async (studentId: string) => {
+    await removeStudent(studentId);
+    refetchBatch();
+  };
+
   const { resources, deleteResource, uploadFile, isUploading } =
     useBatchResources(batchId);
+
+  const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
 
   if (loading || !batch) {
     return (
@@ -54,7 +68,24 @@ export const BatchDetail: React.FC<BatchDetailProps> = ({
               Loading roster...
             </div>
           ) : (
-            <StudentTable students={students} />
+            <>
+              <StudentTable
+                students={students}
+                onAddStudent={() => setAddStudentModalOpen(true)}
+                onRemoveStudent={handleRemoveStudent}
+              />
+              <AddStudentModal
+                isOpen={addStudentModalOpen}
+                onClose={() => setAddStudentModalOpen(false)}
+                onAdd={handleAddStudent}
+                organizationId={
+                  typeof user?.organizationId === "string"
+                    ? user.organizationId
+                    : (user?.organizationId as { id?: string })?.id ?? ""
+                }
+                existingStudentIds={students.map((s) => s.id)}
+              />
+            </>
           ))}
 
         {tab === "resources" && (

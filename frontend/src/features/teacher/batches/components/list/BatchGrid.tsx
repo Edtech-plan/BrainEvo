@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronDown } from "lucide-react";
 import { BatchCard } from "./BatchCard";
 import { Batch } from "../../../../../shared/types/batch.types";
 import { theme } from "../../../../../shared/components/ui/theme";
@@ -7,10 +8,14 @@ export const BatchGrid = ({
   batches,
   loading,
   onSelect,
+  pagination,
+  onLoadMore,
 }: {
   batches: Batch[];
   loading: boolean;
   onSelect: (id: string) => void;
+  pagination?: { total: number; totalPages: number; hasMore: boolean } | null;
+  onLoadMore?: () => void;
 }) => {
   if (loading) {
     return (
@@ -49,10 +54,29 @@ export const BatchGrid = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {batches.map((b) => (
-        <BatchCard key={b.id} batch={b} onClick={onSelect} />
-      ))}
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {batches.map((b) => (
+          <BatchCard key={b.id} batch={b} onClick={onSelect} />
+        ))}
+      </div>
+      {pagination?.hasMore && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={onLoadMore}
+            disabled={loading}
+            className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition"
+            style={{
+              backgroundColor: theme.colors.primaryLight,
+              color: theme.colors.primary,
+              border: `1px solid ${theme.colors.primary}`,
+            }}
+          >
+            Load More ({pagination.total - batches.length} remaining)
+            <ChevronDown size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

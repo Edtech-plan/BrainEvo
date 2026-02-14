@@ -22,10 +22,7 @@ interface BatchesListProps {
 }
 
 export const BatchesList: React.FC<BatchesListProps> = ({ onSelectBatch }) => {
-  // Fetch data using the custom hook
-  const { batches, loading, error, refetch, createBatch } = useBatches();
-
-  // Local state for the "Create Batch" modal
+  const { batches, loading, error, refetch, createBatch, pagination, loadMore } = useBatches();
   const [modalOpen, setModalOpen] = useState(false);
 
   // --- Error State View ---
@@ -95,10 +92,13 @@ export const BatchesList: React.FC<BatchesListProps> = ({ onSelectBatch }) => {
         </button>
       </div>
 
-      {/* Grid of Batches */}
-      <BatchGrid batches={batches} loading={loading} onSelect={onSelectBatch} />
-
-      {/* Create Modal */}
+      <BatchGrid
+        batches={batches}
+        loading={loading}
+        onSelect={onSelectBatch}
+        pagination={pagination}
+        onLoadMore={loadMore}
+      />
       <CreateBatchModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

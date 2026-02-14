@@ -1,4 +1,5 @@
 import apiClient from '@/shared/lib/axios';
+import { env } from '@/config/env';
 import type { Assignment, Submission } from '@/shared/types/assignment.types';
 
 interface BackendAssignment {
@@ -88,13 +89,19 @@ class AssignmentService {
       body.content = data.link;
     }
     if (data.file) {
-      // --- FILE UPLOAD FEATURE CLOSED FOR NOW ---
-      // When backend POST /api/submissions/upload is enabled:
-      // const formData = new FormData();
-      // formData.append('file', data.file);
-      // const uploadRes = await apiClient.post<{ success: boolean; fileUrl?: string }>('/api/submissions/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      // if (uploadRes.data?.fileUrl) body.fileUrl = uploadRes.data.fileUrl;
-      body.content = `File: ${data.file.name}`;
+      const formData = new FormData();
+      formData.append('file', data.file);
+      const uploadRes = await apiClient.post<{ success: boolean; fileUrl?: string }>(
+        '/api/submissions/upload',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      if (uploadRes.data?.fileUrl) {
+        body.fileUrl = uploadRes.data.fileUrl.startsWith('http')
+          ? uploadRes.data.fileUrl
+          : `${env.API_URL}${uploadRes.data.fileUrl}`;
+      }
+      body.content = body.fileUrl || `File: ${data.file.name}`;
     }
     const response = await apiClient.post<{ success: boolean }>('/api/submissions', body);
     return response.data?.success ?? false;

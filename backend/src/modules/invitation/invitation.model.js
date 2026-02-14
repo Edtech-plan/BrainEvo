@@ -46,8 +46,7 @@ const invitationSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// Index for faster lookups
-invitationSchema.index({ token: 1 });
+// Index for faster lookups (token already has unique index from schema)
 invitationSchema.index({ email: 1, organizationId: 1 });
 
 // Check if invitation is valid
