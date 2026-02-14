@@ -1,8 +1,11 @@
 const Course = require('./course.model');
 
 class CourseService {
-  async findAll() {
-    return await Course.find().populate('instructor', 'name email');
+  async findAll({ page = 1, limit = 20, skip = 0 } = {}) {
+    const query = Course.find().populate('instructor', 'name email');
+    const total = await Course.countDocuments();
+    const courses = await query.skip(skip).limit(limit).lean();
+    return { data: courses, total };
   }
 
   async findById(id) {

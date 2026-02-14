@@ -1,9 +1,15 @@
 import React from "react";
-import { Mail, MoreVertical } from "lucide-react";
+import { Mail, MoreVertical, Trash2, UserPlus } from "lucide-react";
 import { BatchStudent } from "../../../../../shared/types/batch.types";
 import { theme } from "../../../../../shared/components/ui/theme";
 
-export const StudentTable = ({ students }: { students: BatchStudent[] }) => {
+interface StudentTableProps {
+  students: BatchStudent[];
+  onAddStudent?: () => void;
+  onRemoveStudent?: (studentId: string) => void;
+}
+
+export const StudentTable = ({ students, onAddStudent, onRemoveStudent }: StudentTableProps) => {
   const thStyle = {
     padding: "12px 16px",
     fontSize: "11px",
@@ -30,6 +36,23 @@ export const StudentTable = ({ students }: { students: BatchStudent[] }) => {
         borderColor: theme.colors.border,
       }}
     >
+      {onAddStudent && (
+        <div
+          className="flex justify-end p-4 border-b"
+          style={{ borderColor: theme.colors.border }}
+        >
+          <button
+            onClick={onAddStudent}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition"
+            style={{
+              backgroundColor: theme.colors.primary,
+              color: "#fff",
+            }}
+          >
+            <UserPlus size={18} /> Add Student
+          </button>
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
@@ -106,7 +129,18 @@ export const StudentTable = ({ students }: { students: BatchStudent[] }) => {
                   </span>
                 </td>
                 <td style={{ ...tdStyle, textAlign: "right" }}>
-                  <MoreVertical size={16} color={theme.colors.textSecondary} />
+                  {onRemoveStudent ? (
+                    <button
+                      onClick={() => onRemoveStudent(s.id)}
+                      className="p-1.5 rounded hover:bg-red-50 transition"
+                      style={{ color: theme.colors.error }}
+                      title="Remove from batch"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  ) : (
+                    <MoreVertical size={16} color={theme.colors.textSecondary} />
+                  )}
                 </td>
               </tr>
             ))}

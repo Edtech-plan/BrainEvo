@@ -10,7 +10,7 @@ interface BatchesListProps {
 }
 
 export const BatchesList: React.FC<BatchesListProps> = ({ onSelectBatch }) => {
-  const { batches, loading, error, refetch, createBatch } = useBatches();
+  const { batches, loading, error, refetch, createBatch, pagination, loadMore } = useBatches();
   const [modalOpen, setModalOpen] = useState(false);
 
   if (error) {
@@ -77,7 +77,13 @@ export const BatchesList: React.FC<BatchesListProps> = ({ onSelectBatch }) => {
         </button>
       </div>
 
-      <BatchGrid batches={batches} loading={loading} onSelect={onSelectBatch} />
+      <BatchGrid
+        batches={batches}
+        loading={loading}
+        onSelect={onSelectBatch}
+        pagination={pagination}
+        onLoadMore={loadMore}
+      />
       <CreateBatchModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

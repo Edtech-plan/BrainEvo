@@ -1,9 +1,11 @@
 const courseService = require('./course.service');
+const { parsePagination, paginatedResponse } = require('../../utils/pagination');
 
 exports.getCourses = async (req, res, next) => {
   try {
-    const courses = await courseService.findAll();
-    res.json({ success: true, count: courses.length, data: courses });
+    const { page, limit, skip } = parsePagination(req.query);
+    const { data, total } = await courseService.findAll({ page, limit, skip });
+    res.json({ success: true, ...paginatedResponse(data, total, page, limit) });
   } catch (error) {
     next(error);
   }

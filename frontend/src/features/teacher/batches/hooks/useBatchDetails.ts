@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Batch, BatchStats } from "../../../../shared/types/batch.types";
 import { BatchesService } from "../services/batches.service";
 
@@ -7,7 +7,7 @@ export const useBatchDetails = (batchId: string) => {
   const [stats, setStats] = useState<BatchStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const refetch = useCallback(() => {
     if (!batchId) return;
     setLoading(true);
     Promise.all([
@@ -26,5 +26,9 @@ export const useBatchDetails = (batchId: string) => {
       });
   }, [batchId]);
 
-  return { batch, stats, loading };
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { batch, stats, loading, refetch };
 };
