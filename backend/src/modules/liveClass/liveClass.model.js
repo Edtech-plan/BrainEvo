@@ -33,6 +33,15 @@ const liveClassSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    enum: ['scheduled', 'live', 'completed', 'cancelled'],
+    default: 'scheduled',
+  },
+  recordingUrl: { type: String, required: false },
+  notesUrl: { type: String, required: false },
+  registeredStudents: { type: Number, default: 0 },
+  actualAttendance: { type: Number, default: 0 },
 }, {
   timestamps: true,
 });
