@@ -1,13 +1,13 @@
 import React from "react";
-import { LiveSession } from "../../../../../shared/types/live.types";
+import { LiveClass } from "@/shared/types/liveClass.types";
 import { formatSessionDate, getStatusColor } from "../../utils/timeHelpers";
 
-interface SeesionCardProps {
-  session: LiveSession;
+interface SessionCardProps {
+  session: LiveClass;
   onUploadClick: (id: string) => void;
 }
 
-export const SessionCard: React.FC<SeesionCardProps> = ({
+export const SessionCard: React.FC<SessionCardProps> = ({
   session,
   onUploadClick,
 }) => {
@@ -18,10 +18,10 @@ export const SessionCard: React.FC<SeesionCardProps> = ({
       <div className="flex gap-4">
         <div className="text-center bg-gray-50 rounded-lg p-3 min-w-[70px] h-fit">
           <span className="block text-xs font-bold text-gray-500 uppercase">
-            {formatSessionDate(session.startTime).split(" ")[0]}
+            {formatSessionDate(session.scheduledAt).split(" ")[0]}
           </span>
           <span className="block text-xl font-bold text-gray-900">
-            {formatSessionDate(session.startTime).split(" ")[2]}
+            {formatSessionDate(session.scheduledAt).split(" ")[2]}
           </span>
         </div>
         <div>
@@ -32,9 +32,9 @@ export const SessionCard: React.FC<SeesionCardProps> = ({
             {session.status}
           </span>
           <h3 className="text-lg font-bold text-gray-800 mt-1">
-            {session.topic}
+            {session.title}
           </h3>
-          <p className="text-sm text-gray-500">{session.batchName}</p>
+          <p className="text-sm text-gray-500">{session.courseName}</p>
         </div>
       </div>
 

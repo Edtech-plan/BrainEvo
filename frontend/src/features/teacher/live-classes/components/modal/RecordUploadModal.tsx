@@ -32,7 +32,7 @@ export const RecordUploadModal: React.FC<RecordUploadModalProps> = ({
 
   return (
     // NOTE: High z-index (100) is critical here to sit above the layout sidebar
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 relative">
         <h2 className="text-lg font-bold text-gray-900 mb-2">Add Recording</h2>
         <p className="text-sm text-gray-500 mb-4">

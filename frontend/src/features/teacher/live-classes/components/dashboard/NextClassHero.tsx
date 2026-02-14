@@ -1,8 +1,8 @@
 import React from "react";
-import { LiveSession } from "../../../../../shared/types/live.types";
+import { LiveClass } from "@/shared/types/liveClass.types";
 import { formatSessionTime } from "../../utils/timeHelpers";
 
-export const NextClassHero: React.FC<{ session?: LiveSession }> = ({
+export const NextClassHero: React.FC<{ session?: LiveClass }> = ({
   session,
 }) => {
   if (!session) return null;
@@ -15,13 +15,13 @@ export const NextClassHero: React.FC<{ session?: LiveSession }> = ({
             UP NEXT
           </span>
           <h2 className="text-2xl md:text-3xl font-bold mb-1">
-            {session.topic}
+            {session.title}
           </h2>
-          <p className="text-indigo-100 text-lg">{session.batchName}</p>
+          <p className="text-indigo-100 text-lg">{session.courseName}</p>
           <div className="flex items-center gap-4 mt-4 text-sm font-medium text-indigo-100/90">
-            <span>🕒 Starts at {formatSessionTime(session.startTime)}</span>
+            <span>🕒 Starts at {formatSessionTime(session.scheduledAt)}</span>
             <span>•</span>
-            <span>⏳ {session.durationMinutes} Mins</span>
+            <span>⏳ {session.duration} Mins</span>
           </div>
         </div>
         <button

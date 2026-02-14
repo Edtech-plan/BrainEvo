@@ -1,5 +1,5 @@
 import React from "react";
-import { LiveStats as StatsType } from "../../../../../shared/types/live.types";
+import { LiveStats as StatsType } from "@/shared/types/liveClass.types";
 
 export const LiveStats: React.FC<{ stats: StatsType }> = ({ stats }) => {
   const cards = [

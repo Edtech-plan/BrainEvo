@@ -1,10 +1,10 @@
 import React from "react";
-import { LiveSession } from "../../../../../shared/types/live.types";
+import { LiveClass } from "@/shared/types/liveClass.types";
 import { SessionCard } from "./SessionCard";
 import { EmptyState } from "./EmptyState";
 
 interface SessionListProps {
-  sessions: LiveSession[];
+  sessions: LiveClass[];
   isLoading: boolean;
   onUploadClick: (id: string) => void;
 }

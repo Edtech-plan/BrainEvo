@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { LiveSession } from "../../../../shared/types/live.types";
+import { LiveClass } from "@/shared/types/liveClass.types"; // Unified Import
 import { LiveService } from "../services/live.service";
 
 export const useLiveSessions = () => {
-  const [sessions, setSessions] = useState<LiveSession[]>([]);
+  const [sessions, setSessions] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

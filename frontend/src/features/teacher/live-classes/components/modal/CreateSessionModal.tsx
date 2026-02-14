@@ -2,27 +2,21 @@
  * CreateSessionModal Component
  * ------------------------------------------------
  * A modal form allowing teachers to schedule new live classes.
- *
- * Features:
- * - Dynamic Batch Selection
- * - Form Validation (Required fields)
- * - Strict Error Handling (Displays backend errors)
- * - Loading states during submission
+ * Updated to match the unified `CreateLiveClassPayload` schema.
  */
 
 import React, { useState } from "react";
-import { CreateSessionPayload } from "../../../../../shared/types/live.types";
+import { AlertCircle } from "lucide-react";
+import { CreateLiveClassPayload } from "@/shared/types/liveClass.types"; // Unified Import
 
 interface CreateSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateSessionPayload) => void;
+  onSubmit: (data: CreateLiveClassPayload) => void;
   isSubmitting: boolean;
-  error: string | null; // Error message from the hook/service layer
+  error: string | null;
 }
 
-// Mock Batches Configuration
-// TODO: In a real implementation, replace this with a `useBatches()` hook fetch.
 const BATCH_OPTIONS = [
   { id: "b-alpha", name: "Physics - Batch Alpha" },
   { id: "b-beta", name: "Maths - JEE Mains" },
@@ -37,27 +31,21 @@ export const CreateSessionModal: React.FC<CreateSessionModalProps> = ({
   isSubmitting,
   error,
 }) => {
-  // Local form state
-  const [form, setForm] = useState<CreateSessionPayload>({
-    batchId: "b-alpha", // Default selection
-    topic: "",
+  // Local state aligned with new schema
+  const [form, setForm] = useState<CreateLiveClassPayload>({
+    courseId: "b-alpha",
+    title: "",
     description: "",
-    startTime: "",
-    durationMinutes: 60, // Default duration: 1 hour
+    scheduledAt: "",
+    duration: 60,
     meetingLink: "",
   });
 
-  // Early return if modal is hidden (prevents unnecessary rendering)
   if (!isOpen) return null;
 
-  /**
-   * Handles form submission.
-   * Prevents default browser behavior and performs basic client-side validation.
-   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // strict check: ensure required fields are present
-    if (!form.topic || !form.startTime || !form.meetingLink) return;
+    if (!form.title || !form.scheduledAt || !form.meetingLink) return;
     onSubmit(form);
   };
 
@@ -67,21 +55,20 @@ export const CreateSessionModal: React.FC<CreateSessionModalProps> = ({
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           Schedule Live Class
         </h2>
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* --- Batch Selection --- */}
+          {/* Batch/Course Selection */}
           <div>
             <label
-              htmlFor="batch-select"
+              htmlFor="courseId"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               Select Batch
             </label>
             <select
-              id="batch-select"
+              id="courseId"
               className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
-              value={form.batchId}
-              onChange={(e) => setForm({ ...form, batchId: e.target.value })}
+              value={form.courseId}
+              onChange={(e) => setForm({ ...form, courseId: e.target.value })}
             >
               {BATCH_OPTIONS.map((batch) => (
                 <option key={batch.id} value={batch.id}>
@@ -91,80 +78,76 @@ export const CreateSessionModal: React.FC<CreateSessionModalProps> = ({
             </select>
           </div>
 
-          {/* --- Topic Input --- */}
+          {/* Topic -> Title Input */}
           <div>
             <label
-              htmlFor="topic-input"
+              htmlFor="title"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               Topic
             </label>
             <input
-              id="topic-input"
               type="text"
               required
-              placeholder="e.g. Thermodynamics L-01"
+              id="title"
               className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-              value={form.topic}
-              onChange={(e) => setForm({ ...form, topic: e.target.value })}
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
           </div>
 
-          {/* --- Time & Duration Grid --- */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label
-                htmlFor="start-time-input"
+                htmlFor="scheduledAt"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
                 Start Time
               </label>
               <input
-                id="start-time-input"
                 type="datetime-local"
                 required
+                id="scheduledAt"
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm"
-                value={form.startTime}
+                value={form.scheduledAt}
                 onChange={(e) =>
-                  setForm({ ...form, startTime: e.target.value })
+                  setForm({ ...form, scheduledAt: e.target.value })
                 }
               />
             </div>
             <div>
               <label
-                htmlFor="duration-input"
+                htmlFor="duration"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
                 Duration (min)
               </label>
               <input
-                id="duration-input"
                 type="number"
                 required
+                id="duration"
                 min="15"
                 step="15"
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm"
-                value={form.durationMinutes}
+                value={form.duration}
                 onChange={(e) =>
-                  setForm({ ...form, durationMinutes: Number(e.target.value) })
+                  setForm({ ...form, duration: Number(e.target.value) })
                 }
               />
             </div>
           </div>
 
-          {/* --- Meeting Link --- */}
           <div>
             <label
-              htmlFor="meeting-link-input"
+              htmlFor="meetingLink"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               Meeting Link
             </label>
             <input
-              id="meeting-link-input"
               type="url"
               required
-              placeholder="https://zoom.us/..."
+              id="meetingLink"
               className="w-full border border-gray-300 rounded-lg p-2 text-sm"
               value={form.meetingLink}
               onChange={(e) =>
@@ -173,14 +156,13 @@ export const CreateSessionModal: React.FC<CreateSessionModalProps> = ({
             />
           </div>
 
-          {/* --- Error Banner (Strict Error Handling) --- */}
           {error && (
             <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100 flex items-center gap-2 animate-pulse">
-              ⚠️ {error}
+              <AlertCircle size={16} />
+              <span>{error}</span>
             </div>
           )}
 
-          {/* --- Action Buttons --- */}
           <div className="flex gap-3 mt-4">
             <button
               type="button"

@@ -1,21 +1,19 @@
 import { useState } from "react";
-import { CreateSessionPayload } from "../../../../shared/types/live.types";
+import { CreateLiveClassPayload } from "@/shared/types/liveClass.types"; // Unified Import
 import { LiveService } from "../services/live.service";
 
 export const useSessionActions = (onSuccess: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // 👇 NEW: Track action-specific errors
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const createSession = async (payload: CreateSessionPayload) => {
+  const createSession = async (payload: CreateLiveClassPayload) => {
     try {
       setIsSubmitting(true);
-      setActionError(null); // Reset previous errors
+      setActionError(null);
       await LiveService.create(payload);
       onSuccess();
     } catch (error) {
       console.error("Create failed", error);
-      // 👇 NEW: Set user-friendly error message
       setActionError("Failed to schedule class. Please try again.");
       throw error;
     } finally {
@@ -31,7 +29,6 @@ export const useSessionActions = (onSuccess: () => void) => {
       onSuccess();
     } catch (error) {
       console.error("Upload failed", error);
-      // 👇 NEW: Set user-friendly error message
       setActionError("Failed to save recording URL.");
       throw error;
     } finally {
@@ -39,14 +36,13 @@ export const useSessionActions = (onSuccess: () => void) => {
     }
   };
 
-  // 👇 NEW: Expose resetError so modal can clear it on close
   const resetError = () => setActionError(null);
 
   return {
     createSession,
     uploadRecording,
     isSubmitting,
-    actionError, // <--- Exported
-    resetError, // <--- Exported
+    actionError,
+    resetError,
   };
 };

@@ -1,182 +1,143 @@
 /**
  * Live Class Service (Mock Layer)
  * -------------------------------------
- * This service mimics the backend API behavior for the Live Class Studio.
- * It handles data persistence in memory (`MOCK_SESSIONS`) and simulates
- * network latency to ensure the UI handles loading states correctly.
+ * Handles data persistence and business logic for the Live Studio.
+ * Updated to use the unified `LiveClass` type definition.
  */
 
 import {
-  LiveSession,
-  CreateSessionPayload,
+  LiveClass,
+  CreateLiveClassPayload,
   LiveStats,
-} from "../../../../shared/types/live.types";
+} from "@/shared/types/liveClass.types"; // Unified Import
 import { calculateEndTime } from "../utils/timeHelpers";
 
-// ==========================================
-// 1. HELPER FUNCTIONS
-// ==========================================
-
-/**
- * Simulates a Database JOIN or lookup operation.
- * In a real backend, the `batchId` would be used to fetch the `batchName`
- * from a 'Batches' table. Here, we map it statically.
- */
-const getBatchName = (id: string): string => {
-  const batchMap: Record<string, string> = {
+// Helper: Map Course/Batch IDs to Names (Simulates DB Lookup)
+const getCourseName = (id: string): string => {
+  const map: Record<string, string> = {
     "b-alpha": "Physics - Batch Alpha",
     "b-beta": "Maths - JEE Mains",
     "b-gamma": "Chemistry - Class XII",
     "b-delta": "Biology - NEET",
   };
-  // Fallback for unknown IDs
-  return batchMap[id] || "General Batch";
+  return map[id] || "General Batch";
 };
 
-// ==========================================
-// 2. MOCK DATABASE (In-Memory Storage)
-// ==========================================
-
-const MOCK_SESSIONS: LiveSession[] = [
-  // Scenario A: Future scheduled class
+// Mock Data (Refactored to new schema)
+const MOCK_SESSIONS: LiveClass[] = [
   {
     id: "s-101",
-    batchId: "b-alpha",
-    batchName: "Physics - Batch Alpha",
-    topic: "Thermodynamics: Laws & Entropy",
+    courseId: "b-alpha",
+    courseName: "Physics - Batch Alpha",
+    title: "Thermodynamics: Laws & Entropy",
     description: "Deep dive into the 2nd law.",
-    startTime: new Date(Date.now() + 3600000).toISOString(), // Starts in 1 hour
-    endTime: new Date(Date.now() + 7200000).toISOString(),
-    durationMinutes: 60,
+    scheduledAt: new Date(Date.now() + 3600000).toISOString(),
+    duration: 60,
     meetingLink: "https://zoom.us/j/demo",
     status: "scheduled",
     registeredStudents: 45,
     actualAttendance: 0,
   },
-  // Scenario B: Completed class WITH recording (Archived)
   {
     id: "s-102",
-    batchId: "b-beta",
-    batchName: "Maths - JEE Mains",
-    topic: "Calculus: Derivatives",
+    courseId: "b-beta",
+    courseName: "Maths - JEE Mains",
+    title: "Calculus: Derivatives",
     description: "Intro to derivatives.",
-    startTime: "2023-10-25T10:00:00.000Z",
-    endTime: "2023-10-25T11:30:00.000Z",
-    durationMinutes: 90,
+    scheduledAt: "2023-10-25T10:00:00.000Z",
+    duration: 90,
     meetingLink: "https://meet.google.com/demo",
     status: "completed",
-    recordingUrl: "https://youtube.com/demo", // URL present -> "Watch" button shows
+    recordingUrl: "https://youtube.com/demo",
     registeredStudents: 50,
     actualAttendance: 42,
   },
-  // Scenario C: Completed class WITHOUT recording (Action Required)
   {
     id: "s-103",
-    batchId: "b-gamma",
-    batchName: "Chemistry - Class XII",
-    topic: "Organic Chemistry: Alcohols",
+    courseId: "b-gamma",
+    courseName: "Chemistry - Class XII",
+    title: "Organic Chemistry: Alcohols",
     description: "Properties and reactions.",
-    startTime: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-    endTime: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    durationMinutes: 60,
+    scheduledAt: new Date(Date.now() - 7200000).toISOString(),
+    duration: 60,
     meetingLink: "https://zoom.us/j/test",
     status: "completed",
-    // recordingUrl is MISSING -> "Add Recording" button shows
     registeredStudents: 30,
     actualAttendance: 28,
   },
 ];
 
-// ==========================================
-// 3. SERVICE METHODS
-// ==========================================
-
 export const LiveService = {
   /**
-   * GET /api/live-sessions
-   * Fetches all sessions and sorts them by start time (Ascending).
+   * Fetches all sessions sorted by scheduled time.
    */
-  fetchAll: async (): Promise<LiveSession[]> => {
-    // Simulate network delay (600ms)
+  fetchAll: async (): Promise<LiveClass[]> => {
     await new Promise((r) => setTimeout(r, 600));
-
-    // Return a copy of the array sorted by date
     return [...MOCK_SESSIONS].sort(
       (a, b) =>
-        new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+        new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
     );
   },
 
   /**
-   * POST /api/live-sessions
-   * Creates a new session, calculates end time, and looks up batch details.
+   * Creates a new session with proper course name mapping.
    */
-  create: async (payload: CreateSessionPayload): Promise<LiveSession> => {
+  create: async (payload: CreateLiveClassPayload): Promise<LiveClass> => {
     await new Promise((r) => setTimeout(r, 800));
 
-    // 1. Resolve Batch Name from ID
-    const batchName = getBatchName(payload.batchId);
+    const courseName = getCourseName(payload.courseId);
 
-    // 2. Construct the full Session Object
-    const newSession: LiveSession = {
-      id: `s-${Date.now()}`, // Generate unique ID
-      batchName, // Mapped name
+    const newSession: LiveClass = {
+      id: `s-${Date.now()}`,
+      courseName,
       status: "scheduled",
-      registeredStudents: 0, // Default for new classes
+      registeredStudents: 0,
       actualAttendance: 0,
-      endTime: calculateEndTime(payload.startTime, payload.durationMinutes),
-      ...payload, // Spread the form data (topic, link, etc.)
+      ...payload,
     };
 
-    // 3. Save to "Database"
-    MOCK_SESSIONS.unshift(newSession); // Add to top of list
+    MOCK_SESSIONS.unshift(newSession);
     return newSession;
   },
 
   /**
-   * PATCH /api/live-sessions/:id
-   * Updates a session with a recording URL and ensures status is 'completed'.
+   * Updates recording URL for archived sessions.
    */
   updateRecording: async (id: string, url: string): Promise<void> => {
     await new Promise((r) => setTimeout(r, 500));
-
     const session = MOCK_SESSIONS.find((s) => s.id === id);
     if (session) {
       session.recordingUrl = url;
-      session.status = "completed"; // Mark as fully complete
+      session.status = "completed";
     }
   },
 
   /**
-   * GET /api/live-sessions/stats
-   * Aggregates data on the server side to return dashboard metrics.
-   * Calculates Total Hours, Class Count, and Average Attendance.
+   * Aggregates dashboard statistics.
    */
   getStats: async (): Promise<LiveStats> => {
     await new Promise((r) => setTimeout(r, 400));
-
-    // Filter only completed sessions for accurate stats
     const completed = MOCK_SESSIONS.filter((s) => s.status === "completed");
 
-    // Calculation: Total Teaching Hours
     const totalHours = completed.reduce(
-      (acc, s) => acc + s.durationMinutes / 60,
+      (acc, s) => acc + (s.duration || 0) / 60,
       0,
     );
 
-    // Calculation: Average Attendance Percentage
     const avgAtt =
       completed.length > 0
         ? completed.reduce(
-            (acc, s) => acc + (s.actualAttendance / s.registeredStudents) * 100,
+            (acc, s) =>
+              acc +
+              ((s.actualAttendance || 0) / (s.registeredStudents || 1)) * 100,
             0,
           ) / completed.length
         : 0;
 
     return {
       totalClasses: completed.length,
-      totalHours: parseFloat(totalHours.toFixed(1)), // Round to 1 decimal
-      avgAttendancePercentage: Math.round(avgAtt), // Round to whole number
+      totalHours: parseFloat(totalHours.toFixed(1)),
+      avgAttendancePercentage: Math.round(avgAtt),
     };
   },
 };
