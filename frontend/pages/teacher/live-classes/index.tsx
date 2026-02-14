@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import {
   LayoutDashboard,
-  Users, // For "Batches"
-  ClipboardList, // For "Assignments"
-  Video, // For "Live Classes"
-  BarChart2, // For "Insights"
+  Users,
+  ClipboardList,
+  Video,
+  BarChart2,
   Settings,
 } from "lucide-react";
 
@@ -16,8 +16,8 @@ import { theme } from "../../../src/shared/components/ui/theme";
 import { getDashboardRoute } from "../../../src/shared/utils/routing";
 import { UserRole } from "../../../src/shared/types";
 
-// Feature Import: The main Assembler for the Dashboard Home
-import { Overview } from "../../../src/features/teacher/dashboard/components";
+// Feature Import: The Live Class Studio Container
+import { LiveClassesDashboard } from "../../../src/features/teacher/live-classes";
 
 type Section =
   | "overview"
@@ -27,14 +27,14 @@ type Section =
   | "insights"
   | "settings";
 
-export default function TeacherDashboardPage() {
+export default function TeacherLiveClassesPage() {
   const router = useRouter();
   const { user, isAuthenticated, loading } = useAuth();
 
-  // State to track which sidebar tab is active
-  const [activeSection, setActiveSection] = useState<Section>("overview");
+  // Default active section is 'live-classes' for this page
+  const [activeSection, setActiveSection] = useState<Section>("live-classes");
 
-  // 1. Auth Guard: Redirect if not logged in or not a teacher
+  // 1. Auth Guard
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
@@ -47,32 +47,27 @@ export default function TeacherDashboardPage() {
     }
   }, [loading, isAuthenticated, user, router]);
 
-  // 2. Navigation Handler
+  // 2. Navigation Handler (Redirects to other pages)
   const handleSectionChange = (sectionId: string) => {
-    // Navigate to specific feature pages
-    if (sectionId === "batches") {
-      router.push("/teacher/batches");
-      return;
+    switch (sectionId) {
+      case "overview":
+        router.push("/teacher/dashboard");
+        break;
+      case "batches":
+        router.push("/teacher/batches");
+        break;
+      case "live-classes":
+        // Already here, do nothing
+        break;
+      default:
+        // For unbuilt pages, we might want to update state or show toast
+        setActiveSection(sectionId as Section);
+        console.log(`Navigate to ${sectionId} - Coming soon`);
+        break;
     }
-
-    // For the current page (Overview), just update state
-    if (sectionId === "overview") {
-      setActiveSection("overview");
-      return;
-    }
-    
-    if (sectionId === "live-classes") {
-      router.push("/teacher/live-classes");
-      return;
-    }
-
-    // Handle other sections (Placeholders for now)
-    const section = sectionId as Section;
-    setActiveSection(section);
-    console.log(`Navigate to ${section} - Coming soon`);
   };
 
-  // 3. Teacher Sidebar Configuration
+  // 3. Sidebar Configuration (Must match Dashboard for consistency)
   const navItems = [
     {
       id: "overview",
@@ -118,9 +113,6 @@ export default function TeacherDashboardPage() {
           backgroundColor: theme.colors.bgMain,
         }}
       >
-        <style>
-          {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
-        </style>
         <div
           style={{
             width: "32px",
@@ -130,45 +122,25 @@ export default function TeacherDashboardPage() {
             borderRadius: "50%",
             animation: "spin 1s linear infinite",
           }}
-        />
+        >
+          <style>
+            {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
+          </style>
+        </div>
       </div>
     );
   }
 
-  // 5. Render Dashboard
   if (!isAuthenticated || !user) return null;
 
+  // 5. Render Layout wrapping the Feature
   return (
     <DashboardLayout
       navItems={navItems}
       activeSection={activeSection}
       onSectionChange={handleSectionChange}
     >
-      {/* 
-        This is where we switch content based on the active tab.
-        Currently, we only have the 'Overview' built.
-      */}
-      {activeSection === "overview" ? (
-        <Overview username={user.name} />
-      ) : (
-        // Placeholder for other sections until they are built
-        <div
-          style={{
-            padding: "40px",
-            textAlign: "center",
-            color: theme.colors.textSecondary,
-            backgroundColor: theme.colors.bgSurface,
-            borderRadius: theme.borderRadius.lg,
-            border: `1px solid ${theme.colors.border}`,
-          }}
-        >
-          <h3>
-            {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}{" "}
-            Section
-          </h3>
-          <p>This module is under development.</p>
-        </div>
-      )}
+      <LiveClassesDashboard />
     </DashboardLayout>
   );
 }
