@@ -4,6 +4,7 @@ import { theme } from '@/shared/components/ui/theme';
 import { AccountSettings } from '@/shared/types/settings.types';
 import { Globe, Clock, LogOut } from 'lucide-react';
 import ConfirmationModal from '@/shared/components/ui/ConfirmationModal'; // Import Shared Modal
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface AccountTabProps {
   settings: AccountSettings;
@@ -12,6 +13,7 @@ interface AccountTabProps {
 
 export default function AccountTab({ settings, onUpdate }: AccountTabProps) {
   const router = useRouter();
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [isLogoutHovered, setIsLogoutHovered] = useState(false);
   
@@ -30,7 +32,7 @@ export default function AccountTab({ settings, onUpdate }: AccountTabProps) {
   };
 
   const handleLogoutConfirm = () => {
-    // Perform logout
+    logout();
     router.push('/login');
   };
 

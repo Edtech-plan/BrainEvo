@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import authService from '../services/auth.service';
 import type { User, RegisterUserData } from '../../../shared/types';
 import type { AppErrorType } from '../../../shared/types/errors.types';
@@ -16,9 +17,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const logout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    setUser(null);
+    setIsAuthenticated(false);
+  };
 
   useEffect(() => {
     const initAuth = async () => {
@@ -45,6 +56,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     initAuth();
   }, []);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      logout();
+      router.push('/login');
+    };
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+    return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
+  }, [router]);
 
   const login = async (email: string, password: string): Promise<User> => {
     try {
@@ -80,15 +100,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: AppErrorType) {
       throw new Error(getErrorMessage(error) || 'Registration failed');
     }
-  };
-
-  const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-    }
-    setUser(null);
-    setIsAuthenticated(false);
   };
 
   return (
