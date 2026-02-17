@@ -9,6 +9,7 @@ import { theme } from '../ui/theme';
 // Import Shared Components
 import ConfirmationModal from '../ui/ConfirmationModal';
 import { useSettings } from '@/features/student/settings';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -38,6 +39,7 @@ export default function DashboardLayout({
 
   // Hook Data
   const { settings } = useSettings();
+  const { logout } = useAuth();
   const profile = settings?.profile;
 
   const getInitials = (name: string) => {
@@ -58,7 +60,7 @@ export default function DashboardLayout({
 
   const handleLogoutConfirm = () => {
     setShowLogoutModal(false);
-    // Perform logout logic (clear tokens etc.)
+    logout();
     router.push('/login');
   };
 

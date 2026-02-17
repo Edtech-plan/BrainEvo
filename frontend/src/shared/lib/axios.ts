@@ -33,10 +33,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Only access localStorage and window in browser environment
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        localStorage.removeItem('user');
+        window.dispatchEvent(new CustomEvent('auth:session-expired'));
       }
     }
     return Promise.reject(error);
