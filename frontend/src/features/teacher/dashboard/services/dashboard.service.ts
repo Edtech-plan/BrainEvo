@@ -1,37 +1,57 @@
 // src/features/teacher/dashboard/services/dashboard.service.ts
 
-import { DashboardStats, ActivityLog, ClassSession } from '../../../../shared/types/dashboard.types';
+import apiClient from '../../../../shared/lib/axios';
+import type { DashboardStats, ActivityLog, ClassSession } from '../../../../shared/types/dashboard.types';
+
+interface TeacherDashboardResponse {
+  success: boolean;
+  data: {
+    stats: DashboardStats;
+    activities: ActivityLog[];
+    nextClass: ClassSession | null;
+    todaySchedule: ClassSession[];
+  };
+}
+
+let cachedData: TeacherDashboardResponse['data'] | null = null;
+let cacheTime = 0;
+const CACHE_MS = 30000;
+
+async function fetchTeacherDashboard() {
+  if (cachedData && Date.now() - cacheTime < CACHE_MS) {
+    return cachedData;
+  }
+  const response = await apiClient.get<TeacherDashboardResponse>('/api/analytics/teacher-dashboard');
+  cachedData = response.data?.data ?? null;
+  cacheTime = Date.now();
+  return cachedData;
+}
 
 export const DashboardService = {
   getStats: async (): Promise<DashboardStats> => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    return {
-      pendingAssignments: 5,
-      avgAttendance: 88,
-      studentEngagement: 92,
-      totalStudents: 124,
+    const data = await fetchTeacherDashboard();
+    return data?.stats ?? {
+      pendingAssignments: 0,
+      avgAttendance: 0,
+      studentEngagement: 0,
+      totalStudents: 0,
     };
   },
 
   getActivity: async (): Promise<ActivityLog[]> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return [
-      { id: '1', user: 'Kush Kore', action: 'submitted', target: 'Thermodynamics HW', timestamp: new Date().toISOString(), type: 'submission' },
-      { id: '2', user: 'System', action: 'processed recording', target: 'Physics Batch', timestamp: new Date().toISOString(), type: 'system' }
-    ];
+    const data = await fetchTeacherDashboard();
+    return data?.activities ?? [];
   },
 
-  getScheduleData: async (): Promise<{ nextClass: ClassSession | null, todaySchedule: ClassSession[] }> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const now = Date.now();
-    const schedule: ClassSession[] = [
-      { id: '101', title: 'Advanced Calculus', batchName: 'Engineering Math', startTime: new Date(now + 3600000).toISOString(), endTime: new Date(now + 7200000).toISOString(), status: 'SCHEDULED' },
-      { id: '102', title: 'Physics Doubt Session', batchName: 'Evening Batch', startTime: new Date(now + 18000000).toISOString(), endTime: new Date(now + 21600000).toISOString(), status: 'SCHEDULED' }
-    ];
-    return { nextClass: schedule[0], todaySchedule: schedule };
+  getScheduleData: async (): Promise<{ nextClass: ClassSession | null; todaySchedule: ClassSession[] }> => {
+    const data = await fetchTeacherDashboard();
+    return {
+      nextClass: data?.nextClass ?? null,
+      todaySchedule: data?.todaySchedule ?? [],
+    };
   },
 
-  startLiveClass: async (classId: string): Promise<void> => {
-    console.log(`Starting class ${classId}`);
-  }
+  startLiveClass: async (_classId: string): Promise<void> => {
+    // TODO: Add backend endpoint for starting live class session
+  },
 };

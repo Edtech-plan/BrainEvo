@@ -1,137 +1,148 @@
-import {
+import apiClient from "../../../../shared/lib/axios";
+import type {
   Batch,
   BatchStudent,
   BatchResource,
-  CreateBatchPayload,
   BatchStats,
+  CreateBatchPayload,
 } from "../../../../shared/types/batch.types";
 
-// 1. Mutable Mock Data (Existing)
-const MOCK_BATCHES: Batch[] = [
-  {
-    id: "b-101",
-    name: "Physics - Class XI",
-    schedule: { days: ["Mon", "Wed"], startTime: "10:00", endTime: "11:30" },
-    startDate: "2023-09-01",
-    studentCount: 34,
-    status: "active",
-  },
-  {
-    id: "b-102",
-    name: "Mathematics - JEE",
-    schedule: { days: ["Tue", "Thu"], startTime: "16:00", endTime: "18:00" },
-    startDate: "2023-08-15",
-    studentCount: 18,
-    status: "active",
-  },
-];
+const API_BASE = "/api/batches";
 
-const MOCK_STUDENTS: BatchStudent[] = [
-  {
-    id: "s-1",
-    name: "Kush Kore",
-    email: "kush@brainevo.com",
-    joinDate: "2023-09-02",
-    attendanceRate: 98,
-    status: "active",
-  },
-  {
-    id: "s-2",
-    name: "Yash Pagdhare",
-    email: "yash@brainevo.com",
-    joinDate: "2023-09-05",
-    attendanceRate: 65,
-    status: "at_risk",
-  },
-];
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+}
 
-// CHANGED: Use 'let' so we can update it with new uploads
-const MOCK_RESOURCES: BatchResource[] = [
-  {
-    id: "r-1",
-    title: "Kinematics Notes",
-    type: "pdf",
-    url: "#",
-    size: "2.4 MB",
-    uploadDate: "2023-10-01",
-    isPublished: true,
-  },
-];
+interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+}
 
 export const BatchesService = {
-  fetchAll: async (): Promise<Batch[]> => {
-    await new Promise((r) => setTimeout(r, 800));
-    return [...MOCK_BATCHES];
+  fetchAll: async (page = 1, limit = 20): Promise<{ batches: Batch[]; pagination?: PaginatedResponse<Batch>["pagination"] }> => {
+    const response = await apiClient.get<PaginatedResponse<Batch>>(
+      `${API_BASE}?page=${page}&limit=${limit}`
+    );
+    const data = response.data?.data ?? [];
+    const batches = data.map(normalizeBatch);
+    return { batches, pagination: response.data?.pagination };
   },
 
   fetchById: async (id: string): Promise<Batch> => {
-    await new Promise((r) => setTimeout(r, 500));
-    const b = MOCK_BATCHES.find((x) => x.id === id);
-    if (!b) throw new Error("Batch not found");
-    return b;
+    const response = await apiClient.get<ApiResponse<Batch>>(`${API_BASE}/${id}`);
+    const data = response.data?.data;
+    if (!data) throw new Error("Batch not found");
+    return normalizeBatch(data);
   },
 
   fetchStats: async (batchId: string): Promise<BatchStats> => {
-    await new Promise((r) => setTimeout(r, 400));
-    return { avgAttendance: 82, avgPerformance: 76 };
+    const response = await apiClient.get<ApiResponse<BatchStats>>(
+      `${API_BASE}/${batchId}/stats`
+    );
+    const data = response.data?.data;
+    if (!data) throw new Error("Stats not found");
+    return data;
   },
 
   create: async (payload: CreateBatchPayload): Promise<Batch> => {
-    await new Promise((r) => setTimeout(r, 1000));
-
-    const newBatch: Batch = {
-      id: `b-${Date.now()}`,
-      ...payload,
-      studentCount: 0,
-      status: "active",
-    };
-
-    MOCK_BATCHES.unshift(newBatch);
-    return newBatch;
+    const response = await apiClient.post<ApiResponse<Batch>>(API_BASE, payload);
+    const data = response.data?.data;
+    if (!data) throw new Error("Failed to create batch");
+    return normalizeBatch(data);
   },
 
   fetchStudents: async (batchId: string): Promise<BatchStudent[]> => {
-    await new Promise((r) => setTimeout(r, 600));
-    return [...MOCK_STUDENTS];
+    const response = await apiClient.get<ApiResponse<BatchStudent[]>>(
+      `${API_BASE}/${batchId}/students`
+    );
+    const data = response.data?.data ?? [];
+    return data.map(normalizeStudent);
   },
 
   fetchResources: async (batchId: string): Promise<BatchResource[]> => {
-    await new Promise((r) => setTimeout(r, 600));
-    return [...MOCK_RESOURCES];
+    const response = await apiClient.get<ApiResponse<BatchResource[]>>(
+      `${API_BASE}/${batchId}/resources`
+    );
+    const data = response.data?.data ?? [];
+    return data.map(normalizeResource);
   },
 
-  // --- NEW METHOD: Upload Logic ---
   uploadResource: async (
     batchId: string,
-    file: File,
+    file: File
   ): Promise<BatchResource> => {
-    await new Promise((r) => setTimeout(r, 1500)); // Simulate network delay
-
-    // 1. Determine type based on MIME
     let type: "pdf" | "video" | "link" = "link";
     if (file.type.includes("pdf")) type = "pdf";
     else if (file.type.includes("video")) type = "video";
 
-    // 2. Format size (e.g., "3.5 MB")
     const size = (file.size / (1024 * 1024)).toFixed(1) + " MB";
 
-    const newResource: BatchResource = {
-      id: `r-${Date.now()}`,
-      title: file.name,
-      type: type,
-      url: URL.createObjectURL(file), // Creates a local preview URL
-      size: size,
-      uploadDate: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      isPublished: true,
-    };
+    const response = await apiClient.post<ApiResponse<BatchResource>>(
+      `${API_BASE}/${batchId}/resources`,
+      {
+        title: file.name,
+        type,
+        url: "#",
+        size,
+      }
+    );
+    const data = response.data?.data;
+    if (!data) throw new Error("Failed to upload resource");
+    return normalizeResource(data);
+  },
 
-    // 3. Persist to mock DB
-    MOCK_RESOURCES.unshift(newResource);
+  deleteResource: async (batchId: string, resourceId: string): Promise<void> => {
+    await apiClient.delete(`${API_BASE}/${batchId}/resources/${resourceId}`);
+  },
 
-    return newResource;
+  addStudent: async (batchId: string, studentId: string): Promise<BatchStudent> => {
+    const response = await apiClient.post<ApiResponse<BatchStudent>>(
+      `${API_BASE}/${batchId}/students`,
+      { studentId }
+    );
+    const data = response.data?.data;
+    if (!data) throw new Error("Failed to add student");
+    return normalizeStudent(data);
+  },
+
+  removeStudent: async (batchId: string, studentId: string): Promise<void> => {
+    await apiClient.delete(`${API_BASE}/${batchId}/students/${studentId}`);
   },
 };
+
+function normalizeBatch(b: Batch): Batch {
+  return {
+    ...b,
+    schedule: b.schedule || { days: [], startTime: "09:00", endTime: "10:30" },
+    startDate: typeof b.startDate === "string" ? b.startDate : String(b.startDate),
+    studentCount: b.studentCount ?? 0,
+    status: b.status || "active",
+  };
+}
+
+function normalizeStudent(s: BatchStudent): BatchStudent {
+  return {
+    ...s,
+    joinDate: s.joinDate || "",
+    attendanceRate: s.attendanceRate ?? 0,
+    status: s.status || "active",
+  };
+}
+
+function normalizeResource(r: BatchResource): BatchResource {
+  return {
+    ...r,
+    type: r.type || "link",
+    size: r.size || "",
+    uploadDate: r.uploadDate || "",
+    isPublished: r.isPublished !== false,
+  };
+}

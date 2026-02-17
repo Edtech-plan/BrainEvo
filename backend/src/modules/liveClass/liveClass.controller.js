@@ -29,6 +29,7 @@ exports.createLiveClass = async (req, res, next) => {
       instructor: req.body.instructor || req.user.id,
       description: req.body.description || req.body.title, // Use title as description if not provided
       duration: req.body.duration || 60, // Default 60 minutes
+      course: req.body.course || req.body.courseId, // API contract uses courseId
     };
 
     // For learners, make course optional (personal events)
@@ -52,6 +53,32 @@ exports.updateLiveClass = async (req, res, next) => {
       return res.status(404).json({ message: 'Live class not found' });
     }
     res.json({ success: true, data: liveClass });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateRecording = async (req, res, next) => {
+  try {
+    const { recordingUrl } = req.body;
+    if (!recordingUrl || typeof recordingUrl !== 'string') {
+      return res.status(400).json({ message: 'recordingUrl is required' });
+    }
+    const liveClass = await liveClassService.updateRecording(req.params.id, recordingUrl.trim());
+    if (!liveClass) {
+      return res.status(404).json({ message: 'Live class not found' });
+    }
+    res.json({ success: true, data: liveClass });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getStats = async (req, res, next) => {
+  try {
+    const instructorId = req.user?.id || null;
+    const stats = await liveClassService.getStats(instructorId);
+    res.json({ success: true, data: stats });
   } catch (error) {
     next(error);
   }

@@ -1,12 +1,14 @@
 const userService = require('./user.service');
+const { parsePagination, paginatedResponse } = require('../../utils/pagination');
 
 /**
  * Get all users
  */
 exports.getUsers = async (req, res, next) => {
   try {
-    const users = await userService.findAll();
-    res.json({ success: true, count: users.length, data: users });
+    const { page, limit, skip } = parsePagination(req.query);
+    const { data, total } = await userService.findAll({ page, limit, skip });
+    res.json({ success: true, ...paginatedResponse(data, total, page, limit) });
   } catch (error) {
     next(error);
   }

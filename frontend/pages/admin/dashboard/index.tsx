@@ -13,6 +13,7 @@ import { DashboardLayout } from '../../../src/shared/components/layout';
 import { theme } from '../../../src/shared/components/ui/theme';
 import { getDashboardRoute } from '../../../src/shared/utils/routing';
 import type { UserRole } from '../../../src/shared/types';
+import { AdminOverview } from '../../../src/features/admin';
 
 type Section = 'overview' | 'organizations' | 'users' | 'security' | 'settings';
 
@@ -21,7 +22,6 @@ export default function AdminDashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const [activeSection] = useState<Section>('overview');
 
-  // Redirect unauthenticated users and non-admins
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/login');
@@ -37,9 +37,10 @@ export default function AdminDashboard() {
   }, [loading, isAuthenticated, user, router]);
 
   const handleSectionChange = (section: string): void => {
-    // Admin navigation is placeholder for now
+    // Admin navigation - overview is wired; others coming soon
+    if (section === 'overview') return;
     // eslint-disable-next-line no-console
-    console.log(`Admin navigation clicked: ${section} (not wired yet)`);
+    console.log(`Admin section: ${section} (coming soon)`);
   };
 
   const navItems = [
@@ -86,61 +87,7 @@ export default function AdminDashboard() {
       activeSection={activeSection}
       onSectionChange={handleSectionChange}
     >
-      <div style={{ paddingBottom: '40px' }}>
-        <div style={{ marginBottom: '32px' }}>
-          <h1
-            style={{
-              fontSize: '28px',
-              fontWeight: 800,
-              color: theme.colors.textMain,
-              margin: 0,
-              marginBottom: '8px',
-            }}
-          >
-            Welcome back, {user.name || 'Administrator'}!
-          </h1>
-          <p
-            style={{
-              color: theme.colors.textSecondary,
-              fontSize: '16px',
-              margin: 0,
-            }}
-          >
-            This is your admin dashboard. Navigation is visible but not yet
-            connected to admin features.
-          </p>
-        </div>
-
-        <div
-          style={{
-            backgroundColor: theme.colors.bgSurface,
-            padding: '40px',
-            borderRadius: theme.borderRadius.lg,
-            border: `1px solid ${theme.colors.border}`,
-            textAlign: 'center',
-          }}
-        >
-          <p
-            style={{
-              color: theme.colors.textSecondary,
-              fontSize: '16px',
-              margin: 0,
-            }}
-          >
-            Admin tools for managing organizations and users will appear here.
-          </p>
-          <p
-            style={{
-              color: theme.colors.textSecondary,
-              fontSize: '14px',
-              marginTop: '8px',
-              margin: 0,
-            }}
-          >
-            For now, this page is a placeholder for future admin features.
-          </p>
-        </div>
-      </div>
+      <AdminOverview />
     </DashboardLayout>
   );
 }
