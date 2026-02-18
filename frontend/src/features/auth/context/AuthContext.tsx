@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import authService from '../services/auth.service';
 import type { User, RegisterUserData } from '../../../shared/types';
 import type { AppErrorType } from '../../../shared/types/errors.types';
-import { getErrorMessage } from '../../../shared/types/errors.types';
+import { getErrorMessage, isAxiosError } from '../../../shared/types/errors.types';
 
 interface AuthContextType {
   user: User | null;
@@ -33,14 +33,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initAuth = async () => {
-      // Only access localStorage in browser environment
       if (typeof window === 'undefined') {
         setLoading(false);
         return;
       }
 
       const token = localStorage.getItem('token');
-      if (token) {
+      const storedUser = localStorage.getItem('user');
+
+      if (token && storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser) as User;
+          setUser(parsed);
+          setIsAuthenticated(true);
+        } catch {
+          // Invalid JSON, ignore
+        }
+
         try {
           const response = await authService.getMe();
           if (response.success && response.data?.user) {
@@ -48,8 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsAuthenticated(true);
           }
         } catch (error: AppErrorType) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          const is401 = isAxiosError(error) && error.response?.status === 401;
+          if (is401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+            setIsAuthenticated(false);
+          }
         }
       }
       setLoading(false);
