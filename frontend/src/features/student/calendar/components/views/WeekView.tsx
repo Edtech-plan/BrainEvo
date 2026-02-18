@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { getWeekDays, getEventsForDate, formatTime, isToday } from '../../utils/calendar.utils';
 import type { LiveClass } from '@/shared/types';
 import type { Assignment } from '@/shared/types';

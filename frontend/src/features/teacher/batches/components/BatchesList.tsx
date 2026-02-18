@@ -15,7 +15,7 @@ import { Plus, AlertCircle, RefreshCcw } from "lucide-react";
 import { useBatches } from "../hooks/useBatches";
 import { BatchGrid } from "./list/BatchGrid";
 import { CreateBatchModal } from "./list/CreateBatchModal";
-import { theme } from "../../../../shared/components/ui/theme";
+import { theme } from "../../../../../styles/theme";
 
 interface BatchesListProps {
   onSelectBatch: (id: string) => void;

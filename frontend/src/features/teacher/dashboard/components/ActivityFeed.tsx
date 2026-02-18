@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityLog } from '../../../../shared/types/dashboard.types';
-import { theme } from '../../../../shared/components/ui/theme';
+import { theme } from '../../../../../styles/theme';
 
 export const ActivityFeed = ({ logs, loading }: { logs: ActivityLog[]; loading: boolean }) => {
   return (

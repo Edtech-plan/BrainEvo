@@ -2,7 +2,7 @@ import React from "react";
 import { ChevronDown } from "lucide-react";
 import { BatchCard } from "./BatchCard";
 import { Batch } from "../../../../../shared/types/batch.types";
-import { theme } from "../../../../../shared/components/ui/theme";
+import { theme } from "../../../../../../styles/theme";
 
 export const BatchGrid = ({
   batches,

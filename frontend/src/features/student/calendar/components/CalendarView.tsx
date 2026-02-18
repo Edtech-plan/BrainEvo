@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Plus, ChevronDown } from 'lucide-react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import MonthView from './views/MonthView';
 import WeekView from './views/WeekView';
 import DayView from './views/DayView';

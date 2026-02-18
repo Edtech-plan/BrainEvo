@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Calendar, Clock, Link as LinkIcon, AlertCircle, Loader2, User as UserIcon } from 'lucide-react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import liveClassService from '@/features/student/live-classes/services/liveClass.service';
 import userService from '@/modules/user/user.service';
 import type { User } from '@/shared/types';

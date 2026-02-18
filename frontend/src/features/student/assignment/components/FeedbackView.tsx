@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { Submission } from '@/shared/types/assignment.types'; // Fixed Import Path
 import { Award, MessageCircle } from 'lucide-react';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import ClassCard from './ClassCard';
 import SectionHeader from './SectionHeader';
 import { useLiveClasses } from '../hooks/useLiveClasses';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 
 function UpcomingClasses() {
   const { upcomingClasses, loading } = useLiveClasses();

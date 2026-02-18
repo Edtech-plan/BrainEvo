@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { useLiveClasses } from '@/features/student/live-classes';
 import { useAssignments } from '@/features/student/assignment/hooks/useAssignments';
 

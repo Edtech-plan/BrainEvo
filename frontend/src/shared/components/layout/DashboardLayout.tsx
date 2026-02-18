@@ -4,7 +4,7 @@ import Image from 'next/image'; // 1. Import Image component
 import { useRouter } from 'next/router';
 import { PanelLeftClose, PanelLeftOpen, Bell, Menu, X, Settings, LogOut } from 'lucide-react';
 import Sidebar from './Sidebar';
-import { theme } from '../ui/theme';
+import { theme } from '../../../../styles/theme';
 
 // Import Shared Components
 import ConfirmationModal from '../ui/ConfirmationModal';

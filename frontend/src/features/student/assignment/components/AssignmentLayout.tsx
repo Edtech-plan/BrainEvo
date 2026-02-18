@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { useAssignments } from '../hooks/useAssignments';
 import { Assignment } from '@/shared/types/assignment.types'; // Fixed Import Path
 import { AlertCircle } from 'lucide-react';

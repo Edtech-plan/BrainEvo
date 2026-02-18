@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { AppearanceSettings, ThemeMode, EditorKeymap } from '@/shared/types/settings.types';
 import { Moon, Sun, Monitor } from 'lucide-react';
 

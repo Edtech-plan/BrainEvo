@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { StudentProfile } from '@/shared/types/settings.types';
 
 interface PersonalInfoProps {

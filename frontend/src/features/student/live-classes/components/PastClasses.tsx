@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import AttendanceBadge from './AttendanceBadge';
 import ClassCard from './ClassCard';
 import SectionHeader from './SectionHeader';

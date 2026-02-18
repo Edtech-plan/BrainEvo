@@ -1,7 +1,7 @@
 import React from "react";
 import { Mail, MoreVertical, Trash2, UserPlus } from "lucide-react";
 import { BatchStudent } from "../../../../../shared/types/batch.types";
-import { theme } from "../../../../../shared/components/ui/theme";
+import { theme } from "../../../../../../styles/theme";
 
 interface StudentTableProps {
   students: BatchStudent[];

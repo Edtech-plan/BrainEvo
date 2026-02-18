@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from './theme';
+import { theme } from '../../../../styles/theme';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface ConfirmationModalProps {

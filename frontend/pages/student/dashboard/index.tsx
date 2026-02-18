@@ -13,7 +13,7 @@ import {
 import { useAuth } from '../../../src/features/auth/hooks/useAuth'
 import { useStudentRoute } from '../../../src/shared/hooks'
 import { DashboardLayout } from '../../../src/shared/components/layout'
-import { theme } from '../../../src/shared/components/ui/theme'
+import { theme } from '../../../styles/theme'
 import { Overview } from '@/features/student/dashboard'
 
 type Section = 'overview' | 'projects' | 'resources' | 'messages' | 'settings'

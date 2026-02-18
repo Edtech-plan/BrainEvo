@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Calendar, Clock, Link as LinkIcon, Video } from 'lucide-react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import type { LiveClass } from '@/shared/types';
 import type { Assignment } from '@/shared/types';
 

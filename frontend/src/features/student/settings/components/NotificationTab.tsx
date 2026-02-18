@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { NotificationSettings, NotificationChannel } from '@/shared/types/settings.types';
 
 interface NotificationtabProps {

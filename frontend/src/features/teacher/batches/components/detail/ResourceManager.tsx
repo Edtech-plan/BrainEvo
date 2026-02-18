@@ -8,7 +8,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { BatchResource } from "../../../../../shared/types/batch.types";
-import { theme } from "../../../../../shared/components/ui/theme";
+import { theme } from "../../../../../../styles/theme";
 
 interface ResourceManagerProps {
   resources: BatchResource[];

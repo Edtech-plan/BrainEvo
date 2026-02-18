@@ -12,7 +12,7 @@ import {
 import { useStudentRoute } from '../../../src/shared/hooks';
 import { DashboardLayout } from '../../../src/shared/components/layout';
 import { CalendarView } from '@/features/student/calendar';
-import { theme } from '../../../src/shared/components/ui/theme';
+import { theme } from '../../../styles/theme';
 import type { UserRole } from '../../../src/shared/types';
 
 export default function Calendar() {

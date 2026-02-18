@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '../ui/theme';
+import { theme } from '../../../../styles/theme';
 
 export default function AttentionAlerts() {
   const alerts = ['You missed 1 assignment deadline', 'Live class on React Hooks in 30 mins'];

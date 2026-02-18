@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { theme } from '../ui/theme';
+import { theme } from '../../../../styles/theme';
 
 interface SidebarProps {
   navItems: Array<{ id: string; label: string; icon: ReactNode }>;

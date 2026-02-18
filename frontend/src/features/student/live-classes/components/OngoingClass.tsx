@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import ActionButton from './ActionButton';
 import { Clock, User, Signal } from 'lucide-react';
 import { useLiveClasses } from '../hooks/useLiveClasses';

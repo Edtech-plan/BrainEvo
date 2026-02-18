@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { Assignment } from '@/shared/types/assignment.types'; // Fixed Import Path
 import AssignmentCard from './AssignmentCard';
 

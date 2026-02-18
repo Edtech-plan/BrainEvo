@@ -10,7 +10,7 @@ import {
   ResourceManager,
   AddStudentModal,
 } from "./detail";
-import { theme } from "../../../../shared/components/ui/theme";
+import { theme } from "../../../../../styles/theme";
 
 // 1. Define the Props Interface
 interface BatchDetailProps {

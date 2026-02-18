@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { useSettings } from '../hooks/useSettings';
 import { User, Lock, Bell, Palette, Globe } from 'lucide-react';
 import { 

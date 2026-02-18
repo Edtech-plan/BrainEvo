@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useStudentRoute } from '../../../src/shared/hooks';
 import { DashboardLayout } from '../../../src/shared/components/layout';
-import { theme } from '../../../src/shared/components/ui/theme';
+import { theme } from '../../../styles/theme';
 import type { UserRole } from '../../../src/shared/types';
 
 // Import from the feature entry point (Barrel Export)

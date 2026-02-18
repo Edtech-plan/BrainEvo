@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 import { Upload, Link as LinkIcon, CheckCircle, FileText, X } from 'lucide-react';
 import ActionButton from '@/features/student/live-classes/components/ActionButton';
 import { useFileUpload } from '../hooks/useFileUpload'; // Import our new hook
