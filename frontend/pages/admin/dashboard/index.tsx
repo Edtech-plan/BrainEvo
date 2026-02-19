@@ -10,7 +10,7 @@ import {
 
 import { useAuth } from '../../../src/features/auth/hooks/useAuth';
 import { DashboardLayout } from '../../../src/shared/components/layout';
-import { theme } from '../../../src/shared/components/ui/theme';
+import { theme } from '../../../styles/theme';
 import { getDashboardRoute } from '../../../src/shared/utils/routing';
 import type { UserRole } from '../../../src/shared/types';
 import { AdminOverview } from '../../../src/features/admin';

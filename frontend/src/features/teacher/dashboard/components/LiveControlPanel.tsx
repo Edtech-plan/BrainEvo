@@ -1,6 +1,6 @@
 import React from 'react';
 import { ClassSession } from '../../../../shared/types/dashboard.types';
-import { theme } from '../../../../shared/components/ui/theme';
+import { theme } from '../../../../../styles/theme';
 
 interface LiveControlPanelProps { nextClass: ClassSession | null; loading: boolean; onStartClass: (id: string) => void; }
 

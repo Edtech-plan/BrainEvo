@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowLeft, Clock, Users } from "lucide-react";
 import { Batch, BatchStats } from "../../../../../shared/types/batch.types";
-import { theme } from "../../../../../shared/components/ui/theme";
+import { theme } from "../../../../../../styles/theme";
 
 export const BatchHeader = ({
   batch,

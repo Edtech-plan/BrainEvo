@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, UserPlus } from "lucide-react";
-import { theme } from "../../../../../shared/components/ui/theme";
+import { theme } from "../../../../../../styles/theme";
 import type { User } from "../../../../../shared/types";
 import organizationService from "../../../../../modules/organization/organization.service";
 

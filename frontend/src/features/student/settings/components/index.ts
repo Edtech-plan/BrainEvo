@@ -1,6 +1,9 @@
-export * from './profile'; 
-export { default as SettingsLayout } from './SettingsLayout';
-export { default as AppearanceTab } from './AppearanceTab';
-export { default as SecurityTab } from './SecurityTab';
-export { default as NotificationTab } from './NotificationTab';
-export { default as AccountTab } from './AccountTab';
+export { default as SettingsLayout }        from './SettingsLayout';
+export { default as ProfileSection }        from './sections/ProfileSection';
+export { default as AccountSection }        from './sections/AccountSection';
+export { default as NotificationsSection }  from './sections/NotificationsSection';
+export { default as AppearanceSection }     from './sections/AppearanceSection';
+export { default as SettingsCard }          from './ui/SettingsCard';
+export { default as SettingsRow }           from './ui/SettingsRow';
+export { default as ToggleSwitch }          from './ui/ToggleSwitch';
+export { default as AvatarUpload }          from './ui/AvatarUpload';

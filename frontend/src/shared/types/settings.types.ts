@@ -1,65 +1,69 @@
-export type ThemeMode = 'light' | 'dark' | 'system';
-export type EditorKeymap = 'vscode' | 'vim' | 'sublime';
+// Types derived directly from the team's test file contracts.
+// Zero `any` — every field is explicit and required.
 
-// 1. Profile Data - All fields required, use "" for empty states
-export interface StudentProfile {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  headline: string;     
-  avatarUrl: string;    
-  socialLinks: {
-    linkedin: string;
-    portfolio: string;
-  };
+export interface SocialLinks {
+  linkedin:  string;
+  portfolio: string;
 }
 
-// 2. Appearance
-export interface AppearanceSettings {
-  theme: ThemeMode;
+export interface ProfileData {
+  id:          string;
+  fullName:    string;
+  email:       string;      // read-only; changed via account flow
+  phone:       string;
+  headline:    string;
+  avatarUrl:   string;
+  socialLinks: SocialLinks;
+}
+
+export interface AppearanceData {
+  theme:          'light' | 'dark' | 'system';
   editorFontSize: number;
-  editorKeymap: EditorKeymap;
+  editorKeymap:   'vscode' | 'vim' | 'emacs';
 }
 
-// 3. Account
-export interface AccountSettings {
+export interface AccountData {
   timezone: string;
   language: string;
 }
 
-// 4. Notifications
 export interface NotificationChannel {
   email: boolean;
   inApp: boolean;
 }
 
-export interface NotificationSettings {
-  assignmentCreated: NotificationChannel;
-  gradeReleased: NotificationChannel;
+export interface QuietHours {
+  enabled: boolean;
+  start:   string; // 'HH:MM'
+  end:     string; // 'HH:MM'
+}
+
+export interface NotificationsData {
+  assignmentCreated:  NotificationChannel;
+  gradeReleased:      NotificationChannel;
   liveClassReminders: NotificationChannel;
-  announcements: NotificationChannel;
-  quietHours: {
-    enabled: boolean;
-    start: string;
-    end: string;
-  };
+  announcements:      NotificationChannel;
+  quietHours:         QuietHours;
 }
 
-// 5. Security / Login History
-export interface LoginSession {
-  id: string;
-  device: string;      
-  location: string;    
-  ipAddress: string;   
-  lastActive: string;  
-  isCurrent: boolean;
+export interface FullSettings {
+  profile:       ProfileData;
+  appearance:    AppearanceData;
+  account:       AccountData;
+  notifications: NotificationsData;
 }
 
-// 6. API Response
-export interface UserSettingsResponse {
-  profile: StudentProfile;
-  appearance: AppearanceSettings;
-  account: AccountSettings;
-  notifications: NotificationSettings;
+// Returned by every update method
+export interface ServiceResponse {
+  success: boolean;
+  data?:   FullSettings;
 }
+
+// Used only by the password-change flow (not persisted in FullSettings)
+export interface PasswordPayload {
+  currentPassword: string;
+  newPassword:     string;
+  confirmPassword: string;
+}
+
+export type SettingsSection = 'profile' | 'account' | 'notifications' | 'appearance';
