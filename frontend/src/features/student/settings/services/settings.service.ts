@@ -1,96 +1,107 @@
-import apiClient from '../../../../shared/lib/axios';
+// Single source of truth for all Settings API calls.
+// Implements an Observer pattern so any hook can react to settings changes
+// (e.g. AppearanceSection subscribes for live theme preview).
+
+import apiClient from "@/shared/lib/axios";
 import type {
-  UserSettingsResponse,
-  StudentProfile,
-  AppearanceSettings,
-  AccountSettings,
-  NotificationSettings,
-  LoginSession,
-} from '../../../../shared/types/settings.types';
+  FullSettings,
+  ServiceResponse,
+  ProfileData,
+  AppearanceData,
+  AccountData,
+  NotificationsData,
+} from "@/shared/types/settings.types";
 
-const API_BASE = '/api/settings';
-
-/**
- * Convert File to base64 data URL for avatar upload
- */
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+type SettingsSubscriber = (settings: FullSettings) => void;
 
 class SettingsService {
-  async getSettings(): Promise<UserSettingsResponse> {
-    const response = await apiClient.get<{ success: boolean; data: UserSettingsResponse }>(API_BASE);
-    if (!response.data.success || !response.data.data) {
-      throw new Error('Failed to load settings');
-    }
-    return response.data.data;
+  private subscribers: Set<SettingsSubscriber> = new Set();
+
+  // Notifies all registered listeners after every successful mutation
+  private notify(settings: FullSettings): void {
+    this.subscribers.forEach((cb) => cb(settings));
   }
 
-  subscribe(_listener: (data: UserSettingsResponse) => void): () => void {
-    return () => {};
+  // Returns an unsubscribe function — call it in useEffect cleanup
+  subscribe(cb: SettingsSubscriber): () => void {
+    this.subscribers.add(cb);
+    return () => this.subscribers.delete(cb);
   }
 
+  // GET /api/settings — full settings object
+  async getSettings(): Promise<FullSettings> {
+    const response = await apiClient.get("/api/settings");
+    const { success, data } = response.data;
+    if (!success || !data) throw new Error("Failed to load settings");
+    return data as FullSettings;
+  }
+
+  // PUT /api/settings/profile — id and email are server-managed, never sent
+  async updateProfile(
+    payload: Partial<Omit<ProfileData, "id" | "email">>,
+  ): Promise<ServiceResponse> {
+    const response = await apiClient.put("/api/settings/profile", payload);
+    const result = response.data as ServiceResponse;
+    if (result.success && result.data) this.notify(result.data);
+    return result;
+  }
+
+  // PUT /api/settings/appearance
+  async updateAppearance(
+    payload: Partial<AppearanceData>,
+  ): Promise<ServiceResponse> {
+    const response = await apiClient.put("/api/settings/appearance", payload);
+    const result = response.data as ServiceResponse;
+    if (result.success && result.data) this.notify(result.data);
+    return result;
+  }
+
+  // PUT /api/settings/account
+  async updateAccount(payload: Partial<AccountData>): Promise<ServiceResponse> {
+    const response = await apiClient.put("/api/settings/account", payload);
+    const result = response.data as ServiceResponse;
+    if (result.success && result.data) this.notify(result.data);
+    return result;
+  }
+
+  // PUT /api/settings/notifications
+  async updateNotifications(
+    payload: Partial<NotificationsData>,
+  ): Promise<ServiceResponse> {
+    const response = await apiClient.put(
+      "/api/settings/notifications",
+      payload,
+    );
+    const result = response.data as ServiceResponse;
+    if (result.success && result.data) this.notify(result.data);
+    return result;
+  }
+
+  // Converts File to base64, validates size/type, then PUTs to profile endpoint.
+  // Matches test expectations exactly: rejects > 5MB and non-image files.
   async uploadAvatar(file: File): Promise<string> {
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error('File size exceeds 5MB limit.');
-    }
-    if (!file.type.startsWith('image/')) {
-      throw new Error('Invalid file type.');
-    }
-    const base64 = await fileToBase64(file);
-    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/profile`, {
+    if (file.size > 5 * 1024 * 1024)
+      throw new Error("File size exceeds 5MB limit.");
+    if (!file.type.startsWith("image/")) throw new Error("Invalid file type.");
+
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read file."));
+      reader.readAsDataURL(file);
+    });
+
+    const response = await apiClient.put("/api/settings/profile", {
       avatarUrl: base64,
     });
-    if (!response.data.success || !response.data.data?.profile?.avatarUrl) {
-      throw new Error('Failed to upload avatar.');
-    }
-    return response.data.data.profile.avatarUrl;
-  }
-
-  async updateProfile(data: Partial<StudentProfile>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
-    const payload: Record<string, unknown> = {};
-    if (data.fullName !== undefined) payload.fullName = data.fullName;
-    if (data.phone !== undefined) payload.phone = data.phone;
-    if (data.headline !== undefined) payload.headline = data.headline;
-    if (data.avatarUrl !== undefined) payload.avatarUrl = data.avatarUrl;
-    if (data.socialLinks !== undefined) payload.socialLinks = data.socialLinks;
-
-    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/profile`, payload);
-    return { success: response.data.success === true, data: response.data.data };
-  }
-
-  async updateAppearance(data: Partial<AppearanceSettings>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
-    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/appearance`, data);
-    return { success: response.data.success === true, data: response.data.data };
-  }
-
-  async updateAccount(data: Partial<AccountSettings>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
-    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/account`, data);
-    return { success: response.data.success === true, data: response.data.data };
-  }
-
-  async updateNotifications(data: Partial<NotificationSettings>): Promise<{ success: boolean; data?: UserSettingsResponse }> {
-    const response = await apiClient.put<{ success: boolean; data: UserSettingsResponse }>(`${API_BASE}/notifications`, data);
-    return { success: response.data.success === true, data: response.data.data };
-  }
-
-  async getLoginHistory(): Promise<LoginSession[]> {
-    return Promise.resolve([
-      {
-        id: '1',
-        device: 'Chrome (Windows)',
-        location: 'Mumbai',
-        ipAddress: '192.168.1.5',
-        lastActive: new Date().toISOString(),
-        isCurrent: true,
-      },
-    ]);
+    const result = response.data as ServiceResponse;
+    if (!result.success || !result.data)
+      throw new Error("Failed to upload avatar.");
+    this.notify(result.data);
+    return result.data.profile.avatarUrl;
   }
 }
 
-export default new SettingsService();
+// Singleton — consistent state across all hooks in the same session
+const settingsService = new SettingsService();
+export default settingsService;

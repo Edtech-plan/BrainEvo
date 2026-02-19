@@ -1,5 +1,6 @@
-import React, { ReactNode } from 'react';
-import { theme } from '../../../../styles/theme';
+// src/shared/components/layout/Sidebar.tsx
+import React, { ReactNode } from "react";
+import { theme } from "../../../../styles/theme";
 
 interface SidebarProps {
   navItems: Array<{ id: string; label: string; icon: ReactNode }>;
@@ -16,80 +17,88 @@ export default function Sidebar({
   collapsed,
   isMobile = false,
 }: SidebarProps) {
-  
-  const styles = {
-    aside: {
-      width: isMobile ? '100%' : (collapsed ? theme.sizes.sidebarCollapsedWidth : theme.sizes.sidebarWidth),
-      height: '100%',
-      backgroundColor: theme.colors.bgSurface,
-      borderRight: isMobile ? 'none' : `1px solid ${theme.colors.border}`,
-      transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      padding: '16px 12px',
-      overflowX: 'hidden' as const,
-    },
-    button: (isActive: boolean) => ({
-      width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      padding: '12px 16px',
-      marginBottom: '4px',
-      borderRadius: theme.borderRadius.md,
-      cursor: 'pointer',
-      backgroundColor: isActive ? theme.colors.primaryLight : 'transparent',
-      color: isActive ? theme.colors.primary : theme.colors.textSecondary,
-      border: 'none',
-      fontSize: '14px',
-      fontWeight: isActive ? 600 : 500,
-      transition: 'all 0.2s',
-      whiteSpace: 'nowrap' as const,
-      textAlign: 'left' as const,
-    }),
-    iconWrapper: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minWidth: '24px',
-    },
-    label: {
-      opacity: (!isMobile && collapsed) ? 0 : 1,
-      transition: 'opacity 0.2s',
-      marginLeft: '12px',
-      whiteSpace: 'nowrap' as const,
-    }
-  };
-
   return (
-    <aside style={styles.aside}>
-      <nav>
+    <aside
+      style={{
+        width: isMobile
+          ? "100%"
+          : collapsed
+            ? theme.sizes.sidebarCollapsedWidth
+            : theme.sizes.sidebarWidth,
+        height: "100%",
+        background: theme.colors.bgSurface,
+        borderRight: isMobile ? "none" : `1px solid ${theme.colors.border}`,
+        transition: "width 0.3s cubic-bezier(0.4,0,0.2,1)",
+        display: "flex",
+        flexDirection: "column",
+        padding: "10px 8px",
+        overflowX: "hidden",
+        overflowY: "auto",
+      }}
+    >
+      <nav style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
         {navItems.map((item) => {
           const isActive = activeSection === item.id;
           return (
             <button
               key={item.id}
               onClick={() => onSectionChange(item.id)}
-              style={styles.button(isActive)}
+              title={collapsed && !isMobile ? item.label : undefined}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: collapsed && !isMobile ? "11px 0" : "10px 12px",
+                justifyContent:
+                  collapsed && !isMobile ? "center" : "flex-start",
+                borderRadius: theme.borderRadius.md,
+                cursor: "pointer",
+                // Active: gradient sweep from left
+                background: isActive
+                  ? "linear-gradient(90deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.04) 100%)"
+                  : "transparent",
+                borderLeft: isActive
+                  ? `2px solid ${theme.colors.primary}`
+                  : "2px solid transparent",
+                borderTop: "none",
+                borderRight: "none",
+                borderBottom: "none",
+                color: isActive
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary,
+                fontSize: "13.5px",
+                fontWeight: isActive ? 600 : 400,
+                transition: `all ${theme.transitions.fast}`,
+                whiteSpace: "nowrap",
+                textAlign: "left",
+                letterSpacing: isActive ? "-0.01em" : "normal",
+              }}
               onMouseEnter={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.backgroundColor = theme.colors.bgHover;
+                  e.currentTarget.style.background = theme.colors.bgHover;
                   e.currentTarget.style.color = theme.colors.textMain;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.background = "transparent";
                   e.currentTarget.style.color = theme.colors.textSecondary;
                 }
               }}
-              title={collapsed && !isMobile ? item.label : undefined}
             >
-              <div style={styles.iconWrapper}>
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minWidth: "20px",
+                  flexShrink: 0,
+                }}
+              >
                 {item.icon}
-              </div>
-              {(isMobile || !collapsed) && (
-                <span style={styles.label}>{item.label}</span>
-              )}
+              </span>
+              {(isMobile || !collapsed) && <span>{item.label}</span>}
             </button>
           );
         })}

@@ -1,93 +1,178 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Calendar, Clock, Link as LinkIcon, AlertCircle, Loader2, User as UserIcon } from 'lucide-react';
-import { theme } from '@/styles/theme';
-import liveClassService from '@/features/student/live-classes/services/liveClass.service';
-import userService from '@/modules/user/user.service';
-import type { User } from '@/shared/types';
-import { useLiveClasses } from '@/features/student/live-classes';
+// src/features/student/calendar/components/AddEventModal.tsx
+// Modal for creating a new live class/event.
+//
+// BUG FIXED: Date showing one day behind (e.g. clicking 19th showed 18th).
+// ROOT CAUSE: `Date.toISOString()` converts to UTC before formatting.
+//   In IST (UTC+5:30), midnight local = 18:30 of the PREVIOUS day in UTC.
+//   So `new Date(2026,1,19).toISOString()` → "2026-02-18T18:30:00.000Z"
+//   and `.split('T')[0]` → "2026-02-18" — wrong by 1 day.
+// FIX: Use `toLocalISODate()` which reads local year/month/day directly.
 
-interface AddEventModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedDate?: Date;
-  selectedTime?: string;
-  onEventCreated?: () => void;
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  X,
+  Calendar,
+  Clock,
+  Link as LinkIcon,
+  AlertCircle,
+  Loader2,
+  User as UserIcon,
+} from "lucide-react";
+import { theme } from "@/styles/theme";
+import liveClassService from "@/features/student/live-classes/services/liveClass.service";
+import userService from "@/modules/user/user.service";
+import type { User } from "@/shared/types";
+import { useLiveClasses } from "@/features/student/live-classes";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utility: formats a Date as "YYYY-MM-DD" using LOCAL timezone.
+// Never use .toISOString() for date inputs — it converts to UTC first,
+// which shifts the date backwards in timezones ahead of UTC (e.g. IST).
+// ─────────────────────────────────────────────────────────────────────────────
+function toLocalISODate(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-// Move InputWrapper outside component to prevent recreation on every render
-const InputWrapper = React.memo(({ children, icon }: { children: React.ReactNode; icon: React.ReactNode }) => {
-  InputWrapper.displayName = 'InputWrapper';
-  return (
-    <div style={{ position: 'relative' }}>
-      <div style={{
-        position: 'absolute',
-        left: '12px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        color: theme.colors.textSecondary,
-        display: 'flex',
-        alignItems: 'center',
-        zIndex: 1
-      }}>
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared input field wrapper — positions a leading icon inside the input
+// ─────────────────────────────────────────────────────────────────────────────
+const InputWrapper = React.memo(
+  ({
+    children,
+    icon,
+  }: {
+    children: React.ReactNode;
+    icon: React.ReactNode;
+  }) => (
+    <div style={{ position: "relative" }}>
+      <div
+        style={{
+          position: "absolute",
+          left: "12px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          color: theme.colors.textSecondary,
+          display: "flex",
+          alignItems: "center",
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      >
         {icon}
       </div>
       {children}
     </div>
-  );
-});
-InputWrapper.displayName = 'InputWrapper';
+  ),
+);
+InputWrapper.displayName = "InputWrapper";
 
-export default function AddEventModal({ isOpen, onClose, selectedDate, selectedTime, onEventCreated }: AddEventModalProps) {
-  const [eventName, setEventName] = useState('');
-  const [link, setLink] = useState('');
-  const [date, setDate] = useState(
-    selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-  );
-  const [time, setTime] = useState(selectedTime || '09:00');
-  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared styles applied to all <input> / <select> elements in the form
+// ─────────────────────────────────────────────────────────────────────────────
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "11px 12px 11px 40px",
+  borderRadius: theme.borderRadius.md,
+  border: `1.5px solid ${theme.colors.border}`,
+  fontSize: "14px",
+  color: theme.colors.textMain,
+  backgroundColor: theme.colors.bgInput,
+  outline: "none",
+  transition: `all ${theme.transitions.fast}`,
+  fontFamily: theme.font.sans,
+  boxSizing: "border-box",
+};
+
+// Shared label style
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "12px",
+  fontWeight: 700,
+  color: theme.colors.textSecondary,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  marginBottom: "7px",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Props
+// ─────────────────────────────────────────────────────────────────────────────
+interface AddEventModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  /** The date the user clicked on the calendar — passed as a local Date object */
+  selectedDate?: Date;
+  /** Pre-filled hour string, e.g. "09:00" */
+  selectedTime?: string;
+  onEventCreated?: () => void;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────────
+export default function AddEventModal({
+  isOpen,
+  onClose,
+  selectedDate,
+  selectedTime,
+  onEventCreated,
+}: AddEventModalProps) {
+  const [eventName, setEventName] = useState("");
+  const [link, setLink] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [students, setStudents] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [studentsLoading, setStudentsLoading] = useState(false);
+
+  // ── Date & time state initialised with local-safe formatter ─────────────
+  // Uses toLocalISODate() instead of toISOString() to avoid UTC offset shift.
+  const [date, setDate] = useState<string>(
+    selectedDate ? toLocalISODate(selectedDate) : toLocalISODate(new Date()),
+  );
+  const [time, setTime] = useState<string>(selectedTime ?? "09:00");
+
   const { refetch } = useLiveClasses();
+
+  // Track whether modal was previously open to avoid re-running on every render
   const prevIsOpenRef = useRef(false);
   const initializedRef = useRef(false);
 
-  // Memoize the onChange handler to prevent re-renders
-  const handleEventNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEventName(e.target.value);
-  }, []);
+  const handleEventNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setEventName(e.target.value),
+    [],
+  );
 
-  // Initialize form when modal opens - only reset when modal first opens
+  // ── Re-initialise form whenever modal opens ─────────────────────────────
   useEffect(() => {
     if (!isOpen) {
+      // Reset tracking refs when modal closes
       prevIsOpenRef.current = false;
       initializedRef.current = false;
       return;
     }
 
     const wasJustOpened = !prevIsOpenRef.current;
-
     if (wasJustOpened) {
-      // Only reset form fields when modal first opens
-      setEventName('');
-      setLink('');
-      setSelectedStudentId('');
+      // Reset all fields
+      setEventName("");
+      setLink("");
+      setSelectedStudentId("");
       setError(null);
 
-      // Set initial date only when modal first opens
-      if (selectedDate) {
-        setDate(selectedDate.toISOString().split('T')[0]);
-      } else {
-        setDate(new Date().toISOString().split('T')[0]);
-      }
-
-      // Set initial time only when modal first opens
-      if (selectedTime) {
-        setTime(selectedTime);
-      } else {
-        setTime('09:00');
-      }
+      // ── FIXED: use toLocalISODate to avoid UTC date shift ──────────────
+      // Previously: selectedDate.toISOString().split('T')[0]
+      //   → converted to UTC first, giving yesterday's date in IST (+5:30)
+      // Now: reads local year/month/day directly — always correct.
+      setDate(
+        selectedDate
+          ? toLocalISODate(selectedDate)
+          : toLocalISODate(new Date()),
+      );
+      setTime(selectedTime ?? "09:00");
 
       fetchStudents();
       prevIsOpenRef.current = true;
@@ -96,71 +181,88 @@ export default function AddEventModal({ isOpen, onClose, selectedDate, selectedT
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  // Handles Escape key globally while modal is open.
+  // This is the correct a11y pattern — escape closes a dialog regardless of where focus is.
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isOpen, onClose]);
+
+  // ── Fetch learner list for the student dropdown ─────────────────────────
   const fetchStudents = async () => {
     try {
       setStudentsLoading(true);
       setError(null);
       const response = await userService.getUsers();
       if (response.success && response.data) {
-        // Filter only learners (students)
-        const learners = response.data.filter(user => user.role === 'learner');
+        const learners = (response.data as User[]).filter(
+          (u) => u.role === "learner",
+        );
         setStudents(learners);
       }
     } catch (err) {
-      console.error('Error fetching students:', err);
-      // Don't show error for students loading, just log it
+      console.error("AddEventModal: failed to fetch students", err);
     } finally {
       setStudentsLoading(false);
     }
   };
 
+  // ── Form submit ─────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      // Combine date and time into ISO string
+      // Build ISO timestamp from the LOCAL date+time strings the user picked.
+      // `new Date(`${date}T${time}`)` interprets the string in LOCAL time
+      // when the string has no timezone suffix — this is correct behaviour.
       const dateTime = new Date(`${date}T${time}`);
-      const scheduledAt = dateTime.toISOString();
+      const scheduledAt = dateTime.toISOString(); // safe here — sending to API in UTC is correct
 
       const eventData = {
         title: eventName,
         scheduledAt,
-        meetingLink: link || 'https://meet.google.com', // Default link if not provided
-        duration: 60, // Default 60 minutes
-        description: eventName, // Use title as description
+        meetingLink: link || "https://meet.google.com",
+        duration: 60,
+        description: eventName,
       };
 
       const response = await liveClassService.createLiveClass(eventData);
 
       if (response.success) {
-        // Refresh live classes
         await refetch();
-        if (onEventCreated) {
-          onEventCreated();
-        }
+        onEventCreated?.();
         onClose();
       } else {
-        setError('Failed to create event. Please try again.');
+        setError("Failed to create event. Please try again.");
       }
     } catch (err: unknown) {
-      console.error('Error creating event:', err);
+      console.error("AddEventModal: error creating event", err);
 
-      // Handle specific error cases
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as {
+          response?: { status?: number; data?: { message?: string } };
+        };
         if (axiosError.response?.status === 403) {
-          setError('You do not have permission to create events. Only teachers and administrators can create events.');
+          setError("You do not have permission to create events.");
         } else if (axiosError.response?.status === 401) {
-          setError('Please log in to create events.');
+          setError("Please log in to create events.");
         } else if (axiosError.response?.data?.message) {
           setError(axiosError.response.data.message);
         } else {
-          setError('Failed to create event. Please try again.');
+          setError("Failed to create event. Please try again.");
         }
       } else {
-        setError(err instanceof Error ? err.message : 'Failed to create event. Please try again.');
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to create event. Please try again.",
+        );
       }
     } finally {
       setLoading(false);
@@ -169,466 +271,440 @@ export default function AddEventModal({ isOpen, onClose, selectedDate, selectedT
 
   if (!isOpen) return null;
 
+  // ── Focus/blur handlers for input border highlight ──────────────────────
+  const onFocus = (
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    e.currentTarget.style.borderColor = theme.colors.primary;
+    e.currentTarget.style.boxShadow = theme.shadows.input;
+  };
+  const onBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    e.currentTarget.style.borderColor = theme.colors.border;
+    e.currentTarget.style.boxShadow = "none";
+  };
+
   return (
     <div
       style={{
-        position: 'fixed',
+        position: "fixed",
         inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.6)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '20px',
-        animation: 'fadeIn 0.2s ease-out'
+        backgroundColor: theme.colors.bgOverlay,
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: theme.zIndex.modal,
+        padding: "16px",
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
+        if (e.target === e.currentTarget) onClose();
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
+        if (e.key === "Escape") onClose();
       }}
       role="presentation"
       tabIndex={-1}
     >
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        @keyframes aemSlideUp {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0);    }
         }
-        @keyframes slideUp {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        .modal-content {
-          animation: slideUp 0.3s ease-out;
+        @keyframes aemSpin {
+          from { transform: rotate(0deg);   }
+          to   { transform: rotate(360deg); }
         }
       `}</style>
 
-      {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+      {/* ── Modal panel ─────────────────────────────────────────────── */}
       <div
-        className="modal-content"
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-event-modal-title"
         style={{
-          backgroundColor: theme.colors.bgSurface,
+          backgroundColor: theme.colors.bgCard,
           borderRadius: theme.borderRadius.lg,
-          width: '100%',
-          maxWidth: '560px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          position: 'relative',
-          border: `1px solid ${theme.colors.border}`,
-          overflow: 'hidden'
+          width: "100%",
+          maxWidth: "520px",
+          boxShadow: theme.shadows.modal,
+          border: `1px solid ${theme.colors.borderLight}`,
+          overflow: "hidden",
+          animation: "aemSlideUp 0.25s ease-out",
         }}
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            e.stopPropagation();
-            onClose();
-          }
-        }}
-        tabIndex={0}
       >
-      {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
-        {/* Header */}
-        <div style={{
-          padding: '20px 24px',
-          borderBottom: `1px solid ${theme.colors.border}`,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: theme.colors.bgSurface
-        }}>
-          <div>
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              color: theme.colors.textMain,
-              margin: 0
-            }}>
-              Add New Event
-            </h2>
+        {/* ── Header ────────────────────────────────────────────────── */}
+        <div
+          style={{
+            padding: "16px 20px",
+            borderBottom: `1px solid ${theme.colors.border}`,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "rgba(13,17,23,0.3)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {/* Icon badge */}
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "8px",
+                background: theme.gradients.primary,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: theme.shadows.glowSm,
+              }}
+            >
+              <Calendar size={15} color="#fff" />
+            </div>
+            <div>
+              <h2
+                id="add-event-modal-title"
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 700,
+                  color: theme.colors.textMain,
+                  margin: 0,
+                }}
+              >
+                Add New Event
+              </h2>
+              {/* Show the correctly-formatted local date in the subtitle */}
+              <p
+                style={{
+                  fontSize: "11px",
+                  color: theme.colors.textMuted,
+                  margin: 0,
+                }}
+              >
+                {selectedDate
+                  ? selectedDate.toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "Schedule a new live class"}
+              </p>
+            </div>
           </div>
+
+          {/* Close button */}
           <button
             onClick={onClose}
+            aria-label="Close modal"
             style={{
-              padding: '8px',
-              borderRadius: theme.borderRadius.md,
-              border: 'none',
-              backgroundColor: 'transparent',
+              width: "30px",
+              height: "30px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "transparent",
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: "7px",
               color: theme.colors.textSecondary,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-              width: '36px',
-              height: '36px'
+              cursor: "pointer",
+              transition: `all ${theme.transitions.fast}`,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = theme.colors.bgHover;
+              e.currentTarget.style.background = theme.colors.bgHover;
               e.currentTarget.style.color = theme.colors.textMain;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.background = "transparent";
               e.currentTarget.style.color = theme.colors.textSecondary;
             }}
           >
-            <X size={20} />
+            <X size={14} />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-          {/* Event Name */}
-          <div style={{ marginBottom: '18px' }}>
-            <label htmlFor="event-name-input" style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: theme.colors.textMain,
-              marginBottom: '8px'
-            }}>
+        {/* ── Form ──────────────────────────────────────────────────── */}
+        <form onSubmit={handleSubmit} style={{ padding: "20px" }}>
+          {/* Event name */}
+          <div style={{ marginBottom: "16px" }}>
+            <label htmlFor="aem-event-name" style={labelStyle}>
               Event Name <span style={{ color: theme.colors.error }}>*</span>
             </label>
-            <InputWrapper icon={<Calendar size={18} />}>
+            <InputWrapper icon={<Calendar size={16} />}>
               <input
-                id="event-name-input"
-                key="event-name-input"
+                id="aem-event-name"
                 type="text"
                 value={eventName}
                 onChange={handleEventNameChange}
                 required
                 autoComplete="off"
-                style={{
-                  width: '100%',
-                  padding: '12px 12px 12px 40px',
-                  borderRadius: theme.borderRadius.md,
-                  border: `1.5px solid ${theme.colors.border}`,
-                  fontSize: '14px',
-                  color: theme.colors.textMain,
-                  backgroundColor: theme.colors.bgMain,
-                  outline: 'none',
-                  transition: 'all 0.2s',
-                  fontFamily: theme.font
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = theme.colors.primary;
-                  e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.colors.primaryLight}`;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = theme.colors.border;
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
                 placeholder="Enter event name"
+                style={inputStyle}
+                onFocus={onFocus}
+                onBlur={onBlur}
               />
             </InputWrapper>
           </div>
 
-          {/* Date and Time Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
-            {/* Date */}
+          {/* Date + Time row */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+              marginBottom: "16px",
+            }}
+          >
+            {/* Date — value is always a correct local YYYY-MM-DD string */}
             <div>
-            <label htmlFor="event-date-input" style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: theme.colors.textMain,
-              marginBottom: '8px'
-            }}>
-              Date <span style={{ color: theme.colors.error }}>*</span>
-            </label>
-              <InputWrapper icon={<Calendar size={18} />}>
+              <label htmlFor="aem-date" style={labelStyle}>
+                Date <span style={{ color: theme.colors.error }}>*</span>
+              </label>
+              <InputWrapper icon={<Calendar size={16} />}>
                 <input
-                  id="event-date-input"
+                  id="aem-date"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '14px 14px 14px 44px',
-                    borderRadius: theme.borderRadius.md,
-                    border: `1.5px solid ${theme.colors.border}`,
-                    fontSize: '15px',
-                    color: theme.colors.textMain,
-                    backgroundColor: theme.colors.bgMain,
-                    outline: 'none',
-                    transition: 'all 0.2s',
-                    fontFamily: theme.font,
-                    cursor: 'pointer'
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = theme.colors.primary;
-                    e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.colors.primaryLight}`;
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = theme.colors.border;
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
+                  style={inputStyle}
+                  onFocus={onFocus}
+                  onBlur={onBlur}
                 />
               </InputWrapper>
             </div>
 
             {/* Time */}
             <div>
-              <label htmlFor="event-time-input" style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: theme.colors.textMain,
-                marginBottom: '8px'
-              }}>
+              <label htmlFor="aem-time" style={labelStyle}>
                 Time <span style={{ color: theme.colors.error }}>*</span>
               </label>
-              <InputWrapper icon={<Clock size={18} />}>
+              <InputWrapper icon={<Clock size={16} />}>
                 <input
-                  id="event-time-input"
+                  id="aem-time"
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '14px 14px 14px 44px',
-                    borderRadius: theme.borderRadius.md,
-                    border: `1.5px solid ${theme.colors.border}`,
-                    fontSize: '15px',
-                    color: theme.colors.textMain,
-                    backgroundColor: theme.colors.bgMain,
-                    outline: 'none',
-                    transition: 'all 0.2s',
-                    fontFamily: theme.font,
-                    cursor: 'pointer'
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = theme.colors.primary;
-                    e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.colors.primaryLight}`;
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = theme.colors.border;
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
+                  style={inputStyle}
+                  onFocus={onFocus}
+                  onBlur={onBlur}
                 />
               </InputWrapper>
             </div>
           </div>
 
-          {/* Link (Optional) */}
-          <div style={{ marginBottom: '18px' }}>
-            <label htmlFor="event-link-input" style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: theme.colors.textMain,
-              marginBottom: '8px'
-            }}>
-              Meeting Link <span style={{ fontSize: '12px', fontWeight: 400, color: theme.colors.textSecondary }}>(Optional)</span>
+          {/* Meeting link */}
+          <div style={{ marginBottom: "16px" }}>
+            <label htmlFor="aem-link" style={labelStyle}>
+              Meeting Link{" "}
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 400,
+                  color: theme.colors.textMuted,
+                  textTransform: "none",
+                  letterSpacing: 0,
+                }}
+              >
+                (Optional)
+              </span>
             </label>
-            <InputWrapper icon={<LinkIcon size={18} />}>
+            <InputWrapper icon={<LinkIcon size={16} />}>
               <input
-                id="event-link-input"
+                id="aem-link"
                 type="url"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 12px 12px 40px',
-                  borderRadius: theme.borderRadius.md,
-                  border: `1.5px solid ${theme.colors.border}`,
-                  fontSize: '14px',
-                  color: theme.colors.textMain,
-                  backgroundColor: theme.colors.bgMain,
-                  outline: 'none',
-                  transition: 'all 0.2s',
-                  fontFamily: theme.font
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = theme.colors.primary;
-                  e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.colors.primaryLight}`;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = theme.colors.border;
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
                 placeholder="https://meet.google.com/..."
+                style={inputStyle}
+                onFocus={onFocus}
+                onBlur={onBlur}
               />
             </InputWrapper>
           </div>
 
-          {/* Student Dropdown */}
-          <div style={{ marginBottom: '20px' }}>
-            <label htmlFor="event-student-select" style={{
-              display: 'block',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: theme.colors.textMain,
-              marginBottom: '8px'
-            }}>
-              Student <span style={{ fontSize: '12px', fontWeight: 400, color: theme.colors.textSecondary }}>(Optional)</span>
+          {/* Student selector */}
+          <div style={{ marginBottom: "20px" }}>
+            <label htmlFor="aem-student" style={labelStyle}>
+              Student{" "}
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 400,
+                  color: theme.colors.textMuted,
+                  textTransform: "none",
+                  letterSpacing: 0,
+                }}
+              >
+                (Optional)
+              </span>
             </label>
-            <InputWrapper icon={<UserIcon size={18} />}>
+            <InputWrapper icon={<UserIcon size={16} />}>
               <select
-                id="event-student-select"
-                aria-label="Select student"
+                id="aem-student"
                 value={selectedStudentId}
                 onChange={(e) => setSelectedStudentId(e.target.value)}
                 disabled={studentsLoading}
+                aria-label="Select student"
                 style={{
-                  width: '100%',
-                  padding: '14px 14px 14px 44px',
-                  borderRadius: theme.borderRadius.md,
-                  border: `1.5px solid ${theme.colors.border}`,
-                  fontSize: '15px',
-                  color: selectedStudentId ? theme.colors.textMain : theme.colors.textSecondary,
-                  backgroundColor: theme.colors.bgMain,
-                  outline: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontFamily: theme.font,
-                  appearance: 'none',
+                  ...inputStyle,
+                  cursor: "pointer",
+                  appearance: "none",
                   backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 12px center',
-                  paddingRight: '36px'
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 12px center",
+                  paddingRight: "36px",
+                  color: selectedStudentId
+                    ? theme.colors.textMain
+                    : theme.colors.textMuted,
                 }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = theme.colors.primary;
-                  e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.colors.primaryLight}`;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = theme.colors.border;
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                onFocus={onFocus}
+                onBlur={onBlur}
               >
                 <option value="" disabled>
-                  {studentsLoading ? 'Loading students...' : 'Select a student'}
+                  {studentsLoading ? "Loading students..." : "Select a student"}
                 </option>
                 {students.map((student) => (
                   <option key={student.id} value={student.id}>
-                    {student.name} {student.email ? `(${student.email})` : ''}
+                    {student.name}
+                    {student.email ? ` (${student.email})` : ""}
                   </option>
                 ))}
               </select>
             </InputWrapper>
             {students.length === 0 && !studentsLoading && (
-              <p style={{
-                fontSize: '11px',
-                color: theme.colors.textSecondary,
-                marginTop: '4px',
-                margin: '4px 0 0 0'
-              }}>
+              <p
+                style={{
+                  fontSize: "11px",
+                  color: theme.colors.textMuted,
+                  margin: "5px 0 0",
+                }}
+              >
                 No students available
               </p>
             )}
           </div>
 
-          {/* Error Message */}
+          {/* Error banner */}
           {error && (
-            <div style={{
-              padding: '12px 14px',
-              marginBottom: '18px',
-              borderRadius: theme.borderRadius.md,
-              backgroundColor: theme.colors.errorBg,
-              border: `1px solid ${theme.colors.error}30`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <AlertCircle size={16} color={theme.colors.error} />
-              <span style={{
-                color: theme.colors.error,
-                fontSize: '13px',
-                fontWeight: 500
-              }}>
+            <div
+              style={{
+                padding: "10px 14px",
+                marginBottom: "16px",
+                borderRadius: theme.borderRadius.md,
+                backgroundColor: theme.colors.errorBg,
+                border: `1px solid ${theme.colors.errorBorder}`,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <AlertCircle
+                size={15}
+                color={theme.colors.error}
+                style={{ flexShrink: 0 }}
+              />
+              <span
+                style={{
+                  color: theme.colors.errorText,
+                  fontSize: "13px",
+                  fontWeight: 500,
+                }}
+              >
                 {error}
               </span>
             </div>
           )}
 
-          {/* Buttons */}
-          <div style={{
-            display: 'flex',
-            gap: '10px',
-            justifyContent: 'flex-end',
-            paddingTop: '12px',
-            borderTop: `1px solid ${theme.colors.border}`
-          }}>
+          {/* Action buttons */}
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              justifyContent: "flex-end",
+              paddingTop: "14px",
+              borderTop: `1px solid ${theme.colors.border}`,
+            }}
+          >
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
               style={{
-                padding: '10px 20px',
+                padding: "10px 20px",
                 borderRadius: theme.borderRadius.md,
-                border: `1.5px solid ${theme.colors.border}`,
-                backgroundColor: 'transparent',
-                color: theme.colors.textMain,
-                fontSize: '14px',
+                border: `1px solid ${theme.colors.border}`,
+                background: "transparent",
+                color: theme.colors.textSecondary,
+                fontSize: "13px",
                 fontWeight: 600,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s',
-                opacity: loading ? 0.5 : 1
+                cursor: loading ? "not-allowed" : "pointer",
+                transition: `all ${theme.transitions.fast}`,
+                opacity: loading ? 0.5 : 1,
+                fontFamily: theme.font.sans,
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.backgroundColor = theme.colors.bgHover;
+                  e.currentTarget.style.background = theme.colors.bgHover;
+                  e.currentTarget.style.color = theme.colors.textMain;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = theme.colors.textSecondary;
                 }
               }}
             >
               Cancel
             </button>
+
             <button
               type="submit"
               disabled={loading}
               style={{
-                padding: '10px 20px',
+                padding: "10px 20px",
                 borderRadius: theme.borderRadius.md,
-                border: 'none',
-                backgroundColor: loading ? theme.colors.textSecondary : theme.colors.primary,
-                color: '#fff',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s',
-                opacity: loading ? 0.7 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: loading ? 'none' : `0 4px 6px -1px ${theme.colors.primary}20`
+                border: "none",
+                background: loading
+                  ? theme.colors.bgHover
+                  : theme.gradients.primary,
+                color: loading ? theme.colors.textMuted : "#fff",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: loading ? "not-allowed" : "pointer",
+                transition: `all ${theme.transitions.fast}`,
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: loading ? "none" : theme.shadows.glowSm,
+                fontFamily: theme.font.sans,
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.backgroundColor = theme.colors.primaryDark;
-                  e.currentTarget.style.boxShadow = `0 6px 8px -1px ${theme.colors.primary}30`;
+                  e.currentTarget.style.boxShadow =
+                    "0 6px 20px rgba(16,185,129,0.35)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.backgroundColor = theme.colors.primary;
-                  e.currentTarget.style.boxShadow = `0 4px 6px -1px ${theme.colors.primary}20`;
+                  e.currentTarget.style.boxShadow = theme.shadows.glowSm;
+                  e.currentTarget.style.transform = "translateY(0)";
                 }
               }}
             >
               {loading ? (
                 <>
-                  <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                  <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+                  <Loader2
+                    size={15}
+                    style={{ animation: "aemSpin 1s linear infinite" }}
+                  />
                   Creating...
                 </>
               ) : (
-                'Create Event'
+                "Create Event"
               )}
             </button>
           </div>
