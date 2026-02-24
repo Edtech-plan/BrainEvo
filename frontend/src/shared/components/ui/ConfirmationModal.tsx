@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { theme } from "../../../../styles/theme";
+import { theme } from "@/styles/theme";
 import { AlertTriangle, LogOut, Trash2, X } from "lucide-react";
 
 interface ConfirmationModalProps {
