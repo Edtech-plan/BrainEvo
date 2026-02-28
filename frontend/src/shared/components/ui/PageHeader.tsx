@@ -1,6 +1,6 @@
 // PageHeader.tsx
 import React from 'react';
-import { theme } from '@/shared/components/ui/theme';
+import { theme } from '@/styles/theme';
 
 interface PageHeaderProps {
   title: string;

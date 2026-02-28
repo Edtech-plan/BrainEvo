@@ -11,21 +11,23 @@
 
 export type SessionStatus = "scheduled" | "live" | "completed" | "cancelled";
 
+export type AttendanceStatus = "Present" | "Late" | "Absent";
+
 export interface LiveClass {
   id: string;
-  
+
   // Core Details
-  title: string;              // Replaces 'topic'
+  title: string; // Replaces 'topic'
   description?: string;
   meetingLink: string;
-  
+
   // Timing
-  scheduledAt: string;        // Replaces 'startTime' (ISO 8601 string)
-  duration: number;           // Replaces 'durationMinutes' (in minutes)
-  
+  scheduledAt: string; // Replaces 'startTime' (ISO 8601 string)
+  duration: number; // Replaces 'durationMinutes' (in minutes)
+
   // Context (Batch/Course Association)
-  courseId: string;           // Replaces 'batchId'
-  courseName?: string;        // Replaces 'batchName' (Optional display name)
+  courseId: string; // Replaces 'batchId'
+  courseName?: string; // Replaces 'batchName' (Optional display name)
 
   // Status & Post-Class Assets
   status: SessionStatus;
@@ -42,6 +44,7 @@ export interface LiveClass {
     name: string;
     email?: string;
   };
+  attendanceStatus?: AttendanceStatus; // Student attendance record for this session
   createdAt?: string;
   updatedAt?: string;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { DashboardStats } from '../../../../shared/types/dashboard.types';
-import { theme } from '../../../../shared/components/ui/theme';
+import { theme } from '../../../../../styles/theme';
 
 const StatCard = ({ label, value, trend, isHighlight }: { label: string; value: string | number; trend?: string; isHighlight?: boolean }) => (
   <div

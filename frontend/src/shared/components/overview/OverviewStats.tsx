@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock, TrendingUp, BookOpen, Award } from 'lucide-react';
-import { theme } from '../ui/theme';
+import { theme } from '../../../../styles/theme';
 
 export default function OverviewStats() {
   const stats = [

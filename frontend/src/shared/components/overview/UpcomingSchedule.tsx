@@ -1,5 +1,5 @@
 import React from 'react';
-import { theme } from '../ui/theme';
+import { theme } from '../../../../styles/theme';
 
 export default function UpcomingSchedule() {
   const events = [

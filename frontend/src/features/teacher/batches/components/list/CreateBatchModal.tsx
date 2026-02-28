@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { CreateBatchPayload } from "../../../../../shared/types/batch.types";
-import { theme } from "../../../../../shared/components/ui/theme";
+import { theme } from "../../../../../../styles/theme";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 

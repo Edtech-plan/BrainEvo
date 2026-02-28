@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Users, Calendar, ArrowRight } from "lucide-react";
 import { Batch } from "../../../../../shared/types/batch.types";
-import { theme } from "../../../../../shared/components/ui/theme";
+import { theme } from "../../../../../../styles/theme";
 
 export const BatchCard = ({
   batch,

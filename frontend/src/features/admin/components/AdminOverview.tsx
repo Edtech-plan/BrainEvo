@@ -1,6 +1,6 @@
 import React from 'react';
 import { Building2, Users } from 'lucide-react';
-import { theme } from '../../../shared/components/ui/theme';
+import { theme } from '../../../../styles/theme';
 import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 export const AdminOverview = () => {

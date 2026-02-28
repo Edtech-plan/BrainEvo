@@ -1,6 +1,6 @@
 import React from 'react';
 import { ClassSession } from '../../../../shared/types/dashboard.types';
-import { theme } from '../../../../shared/components/ui/theme';
+import { theme } from '../../../../../styles/theme';
 
 export const QuickSchedule = ({ schedule }: { schedule: ClassSession[] }) => {
   return (
